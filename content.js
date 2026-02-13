@@ -7,7 +7,17 @@
  * Extract text content from the page
  */
 function getPageText() {
-    const bodyText = document.body.innerText;
+    // Try to get text from main element first
+    let mainElement = document.querySelector('main');
+    
+    // Fall back to element with role="main"
+    if (!mainElement) {
+        mainElement = document.querySelector('[role="main"]');
+    }
+    
+    // Fall back to body if no main element found
+    const textElement = mainElement || document.body;
+    const bodyText = textElement.innerText;
     return bodyText || '';
 }
 
