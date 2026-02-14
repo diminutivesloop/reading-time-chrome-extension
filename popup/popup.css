@@ -30,32 +30,6 @@ h1 {
   text-align: center;
 }
 
-#stats {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 6px;
-  border-left: 4px solid #667eea;
-}
-
-.label {
-  font-weight: 600;
-  color: #555;
-}
-
-.value {
-  font-weight: 700;
-  color: #667eea;
-  font-size: 16px;
-}
-
 .btn {
   width: 100%;
   padding: 12px;
@@ -69,43 +43,15 @@ h1 {
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-}
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
 
-.btn:active {
-  transform: translateY(0);
-}
-
-.settings-section label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.wpm-control {
-  display: flex;
-  gap: 8px;
-}
-
-.wpm-input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 13px;
-  transition: border-color 0.2s;
-}
-
-.wpm-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 .btn-icon {
@@ -118,14 +64,70 @@ h1 {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+
+  &:hover {
+    background: #5568d3;
+  }
+
+  &:active {
+    background: #4c5ab8;
+  }
 }
 
-.btn-icon:hover {
-  background: #5568d3;
+#stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    border-left: 4px solid #667eea;
+  }
+
+  .label {
+    font-weight: 600;
+    color: #555;
+  }
+
+  .value {
+    font-weight: 700;
+    color: #667eea;
+    font-size: 16px;
+  }
 }
 
-.btn-icon:active {
-  background: #4c5ab8;
+.settings-section {
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .control-wrapper {
+    display: flex;
+    gap: 8px;
+  }
+
+  input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+    }
+  }
 }
 
 #error {

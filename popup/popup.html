@@ -12,15 +12,8 @@
 
       <div class="settings-section">
         <label for="wpmInput">Words Per Minute:</label>
-        <div class="wpm-control">
-          <input
-            type="number"
-            id="wpmInput"
-            class="wpm-input"
-            min="50"
-            max="1000"
-            step="10"
-          />
+        <div class="control-wrapper">
+          <input type="number" id="wpmInput" min="50" max="1000" step="10" />
           <button id="resetWpmBtn" class="btn-icon" title="Reset to default">
             ↻
           </button>
@@ -30,15 +23,15 @@
       <button id="analyzeBtn" class="btn">Analyze Page</button>
 
       <div id="stats">
-        <div class="stat-item">
+        <div class="item">
           <span class="label">Words:</span>
           <span id="wordCount" class="value">-</span>
         </div>
-        <div class="stat-item">
+        <div class="item">
           <span class="label">Reading Time:</span>
           <span id="readingTime" class="value">-</span>
         </div>
-        <div class="stat-item">
+        <div class="item">
           <span class="label">WPM:</span>
           <span id="wpmDisplay" class="value">-</span>
         </div>
