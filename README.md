@@ -26,7 +26,7 @@ reading-time-chrome-extension/
 5. Click **Load unpacked** and select the extension folder
 6. The extension icon will appear in your Chrome toolbar
 
-Note: After reloading the extension the popup may not work until you refresh the current page because the content script is not automatically injected into already loaded pages. 
+Note: After reloading the extension the popup may not work until you refresh the current page because the content script is not automatically injected into already loaded pages.
 
 ## Usage
 
@@ -39,6 +39,7 @@ Note: After reloading the extension the popup may not work until you refresh the
 ## Configuration
 
 To adjust the reading speed calculation, modify the `WORDS_PER_MINUTE` constant in:
+
 - `popup/popup.ts` (for popup display)
 - `content.ts` (for indicator calculation)
 

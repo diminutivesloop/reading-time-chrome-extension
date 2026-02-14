@@ -1,144 +1,148 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    width: 300px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #333;
+  width: 300px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #333;
 }
 
 .container {
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin: 10px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 10px;
 }
 
 h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #667eea;
-    text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #667eea;
+  text-align: center;
 }
 
 #stats {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background: #f5f5f5;
-    border-radius: 6px;
-    border-left: 4px solid #667eea;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
 }
 
 .label {
-    font-weight: 600;
-    color: #555;
+  font-weight: 600;
+  color: #555;
 }
 
 .value {
-    font-weight: 700;
-    color: #667eea;
-    font-size: 16px;
+  font-weight: 700;
+  color: #667eea;
+  font-size: 16px;
 }
 
 .btn {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .btn:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 .settings-section {
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid #e0e0e0;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .settings-section label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: #666;
-    margin-bottom: 8px;
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
 }
 
 .wpm-control {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 .wpm-input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 13px;
-    transition: border-color 0.2s;
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: border-color 0.2s;
 }
 
 .wpm-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .btn-icon {
-    padding: 8px 12px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
+  padding: 8px 12px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .btn-icon:hover {
-    background: #5568d3;
+  background: #5568d3;
 }
 
 .btn-icon:active {
-    background: #4c5ab8;
+  background: #4c5ab8;
 }
 
 #error {
-    display: none;
-    margin-top: 20px;
-    padding: 10px;
-    background: #ffe0e0;
-    color: #d32f2f;
-    border-radius: 6px;
-    font-size: 13px;
-    text-align: center;
+  display: none;
+  margin-top: 20px;
+  padding: 10px;
+  background: #ffe0e0;
+  color: #d32f2f;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
 
-    &.show {
-        display: block;
-    }
+  &.show {
+    display: block;
+  }
 }

@@ -2,13 +2,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
-    "lib": [
-      "ES2022",
-      "DOM"
-    ],
-    "types": [
-      "chrome"
-    ],
+    "lib": ["ES2022", "DOM"],
+    "types": ["chrome"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -18,7 +13,5 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true
   },
-  "exclude": [
-    "node_modules",
-  ]
+  "exclude": ["node_modules"]
 }

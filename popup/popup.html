@@ -1,43 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reading Time</title>
-    <link rel="stylesheet" href="popup.css">
-</head>
-<body>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
     <div class="container">
-        <h1>Reading Time</h1>
-        <div id="stats">
-            <div class="stat-item">
-                <span class="label">Words:</span>
-                <span id="wordCount" class="value">-</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">Reading Time:</span>
-                <span id="readingTime" class="value">-</span>
-            </div>
+      <h1>Reading Time</h1>
+      <div id="stats">
+        <div class="stat-item">
+          <span class="label">Words:</span>
+          <span id="wordCount" class="value">-</span>
         </div>
-        <button id="analyzeBtn" class="btn">Analyze Page</button>
-        
-        <div class="settings-section">
-            <label for="wpmInput">Words Per Minute:</label>
-            <div class="wpm-control">
-                <input 
-                    type="number" 
-                    id="wpmInput" 
-                    class="wpm-input"
-                    min="50"
-                    max="1000"
-                    step="10"
-                >
-                <button id="saveWpmBtn" class="btn-icon" title="Save">✓</button>
-            </div>
+        <div class="stat-item">
+          <span class="label">Reading Time:</span>
+          <span id="readingTime" class="value">-</span>
         </div>
+      </div>
+      <button id="analyzeBtn" class="btn">Analyze Page</button>
 
-        <div id="error"></div>
+      <div class="settings-section">
+        <label for="wpmInput">Words Per Minute:</label>
+        <div class="wpm-control">
+          <input
+            type="number"
+            id="wpmInput"
+            class="wpm-input"
+            min="50"
+            max="1000"
+            step="10"
+          />
+          <button id="saveWpmBtn" class="btn-icon" title="Save">✓</button>
+        </div>
+      </div>
+
+      <div id="error"></div>
     </div>
     <script src="popup.js"></script>
-</body>
+  </body>
 </html>

@@ -1,4 +1,5 @@
 <!-- Custom Copilot instructions for Chrome extension development -->
+
 ## Development Guidelines
 
 - Follow Manifest V3 specifications from Chrome

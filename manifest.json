@@ -4,11 +4,7 @@
   "name": "Reading Time",
   "version": "1.0.0",
   "description": "Displays approximate reading time for articles and web pages",
-  "permissions": [
-    "scripting",
-    "activeTab",
-    "storage"
-  ],
+  "permissions": ["scripting", "activeTab", "storage"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Reading Time"
@@ -18,12 +14,8 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "content.js"
-      ],
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
       "run_at": "document_end"
     }
   ]
