@@ -2,6 +2,8 @@
 
 A lightweight Chrome extension that displays the approximate reading time for articles and web pages.
 
+🤖 Built w/ substantial help from GitHub Copilot
+
 ## Project Structure
 
 ```
