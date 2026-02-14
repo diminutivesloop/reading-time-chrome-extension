@@ -70,7 +70,7 @@ chrome.runtime.onMessage.addListener(
   ) => {
     if (request.action === "getPageStats") {
       const stats = calculatePageStats();
-      sendResponse({ stats, success: true });
+      sendResponse({ stats });
     }
   },
 );
