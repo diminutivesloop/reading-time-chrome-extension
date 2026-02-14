@@ -5,7 +5,7 @@ A lightweight Chrome extension that displays the approximate reading time for ar
 ## Features
 
 - **Quick Analysis**: Click the extension icon to analyze the current page
-- **Reading Statistics**: Displays word count, character count, and estimated reading time
+- **Reading Statistics**: Displays word count and estimated reading time
 - **Accurate Calculations**: Based on average reading speed of 200 words per minute
 - **Manifest V3**: Built with the latest Chrome Extension manifest version
 
@@ -42,7 +42,6 @@ reading-time-chrome-extension/
 3. The popup will display:
    - **Word Count**: Total number of words on the page
    - **Reading Time**: Estimated time to read (in minutes)
-   - **Character Count**: Total number of characters
 
 ## Development
 

@@ -30,13 +30,6 @@ function countWords(text) {
 }
 
 /**
- * Count characters in text
- */
-function countCharacters(text) {
-    return text.length;
-}
-
-/**
  * Calculate reading statistics
  */
 function calculatePageStats() {
@@ -44,7 +37,6 @@ function calculatePageStats() {
     
     const stats = {
         wordCount: countWords(pageText),
-        charCount: countCharacters(pageText),
         textLength: pageText.length
     };
     

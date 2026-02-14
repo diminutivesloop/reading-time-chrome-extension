@@ -30,11 +30,10 @@ async function analyzeCurrentPage() {
  * Display statistics on the popup
  */
 function displayStats(stats) {
-    const {wordCount, charCount} = stats;
+    const {wordCount } = stats;
     const readingTime = Math.ceil(wordCount / WORDS_PER_MINUTE);
     
     document.getElementById('wordCount').textContent = wordCount.toLocaleString();
-    document.getElementById('charCount').textContent = charCount.toLocaleString();
     document.getElementById('readingTime').textContent = readingTime === 1 ? '< 1 min' : `${readingTime} min`;
 }
 
@@ -43,7 +42,6 @@ function displayStats(stats) {
  */
 function showError(message) {
     document.getElementById('wordCount').textContent = '-';
-    document.getElementById('charCount').textContent = '-';
     document.getElementById('readingTime').textContent = '-';
     
     const statsDiv = document.getElementById('stats');
