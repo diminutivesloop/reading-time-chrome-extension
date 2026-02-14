@@ -16,25 +16,52 @@ interface MessageResponse {
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
+const wpmDisplayEl = document.getElementById("wpmDisplay") as HTMLElement;
 const statsDiv = document.getElementById("stats") as HTMLElement;
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
-const saveWpmBtn = document.getElementById("saveWpmBtn") as HTMLButtonElement;
+const resetWpmBtn = document.getElementById("resetWpmBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
 
 if (analyzeBtn) {
-  analyzeBtn.addEventListener("click", analyzeCurrentPage);
+  analyzeBtn.addEventListener("click", async () => {
+    if (await saveWpmSetting()) {
+      analyzeCurrentPage();
+    }
+  });
 }
 
-if (saveWpmBtn) {
-  saveWpmBtn.addEventListener("click", saveWpmSetting);
+if (resetWpmBtn) {
+  resetWpmBtn.addEventListener("click", resetWpmSetting);
 }
 
 if (wpmInput) {
-  wpmInput.addEventListener("keypress", (e) => {
+  wpmInput.addEventListener("keypress", async (e) => {
     if (e.key === "Enter") {
-      saveWpmSetting();
+      if (await saveWpmSetting()) {
+        analyzeCurrentPage();
+      }
     }
   });
+}
+
+/**
+ * Save the WPM setting to storage after validating the input
+ * @returns Boolean indicating whether save was successful
+ */
+async function saveWpmSetting(): Promise<boolean> {
+  clearError();
+
+  const wpm = parseInt(wpmInput.value, 10);
+
+  // Validate input
+  if (isNaN(wpm) || wpm < 50 || wpm > 1000) {
+    showError("Please enter a value between 50 and 1000");
+    return false;
+  }
+
+  // Save the WPM setting
+  await chrome.storage.sync.set({ wordsPerMinute: wpm });
+  return true;
 }
 
 /**
@@ -83,7 +110,8 @@ async function displayStats(stats: PageStats): Promise<void> {
 
   try {
     const { wordCount } = stats;
-    const readingTime = Math.ceil(wordCount / (await getWordsPerMinute()));
+    const wpm = await getWordsPerMinute();
+    const readingTime = Math.ceil(wordCount / wpm);
 
     if (wordCountEl) {
       wordCountEl.textContent = wordCount.toLocaleString();
@@ -91,6 +119,9 @@ async function displayStats(stats: PageStats): Promise<void> {
     if (readingTimeEl) {
       readingTimeEl.textContent =
         readingTime === 1 ? "< 1 min" : `${readingTime} min`;
+    }
+    if (wpmDisplayEl) {
+      wpmDisplayEl.textContent = wpm.toString();
     }
   } catch (error) {
     console.error("Error displaying stats:", error);
@@ -102,13 +133,6 @@ async function displayStats(stats: PageStats): Promise<void> {
  * Show error message
  */
 function showError(message: string): void {
-  if (wordCountEl) {
-    wordCountEl.textContent = "-";
-  }
-  if (readingTimeEl) {
-    readingTimeEl.textContent = "-";
-  }
-
   if (errorEl) {
     errorEl.textContent = message;
     errorEl.classList.add("show");
@@ -139,31 +163,19 @@ async function loadWpmSetting(): Promise<void> {
 }
 
 /**
- * Save the WPM setting
+ * Reset the WPM setting to default
  */
-async function saveWpmSetting(): Promise<void> {
+async function resetWpmSetting(): Promise<void> {
   clearError();
 
   try {
-    const wpm = parseInt(wpmInput.value, 10);
+    await chrome.storage.sync.set({
+      wordsPerMinute: DEFAULT_WORDS_PER_MINUTE,
+    });
 
-    // Validate input
-    if (isNaN(wpm) || wpm < 50 || wpm > 1000) {
-      showError("Please enter a value between 50 and 1000");
-      return;
-    }
-
-    await chrome.storage.sync.set({ wordsPerMinute: wpm });
-
-    // Show success feedback
-    if (saveWpmBtn) {
-      const originalText = saveWpmBtn.textContent;
-      saveWpmBtn.textContent = "✓ Saved";
-      saveWpmBtn.style.opacity = "0.8";
-      setTimeout(() => {
-        saveWpmBtn.textContent = originalText;
-        saveWpmBtn.style.opacity = "1";
-      }, 1500);
+    // Update the input to show the default value
+    if (wpmInput) {
+      wpmInput.value = DEFAULT_WORDS_PER_MINUTE.toString();
     }
 
     // Re-analyze if stats are already shown
@@ -171,13 +183,13 @@ async function saveWpmSetting(): Promise<void> {
       analyzeCurrentPage();
     }
   } catch (error) {
-    console.error("Error saving WPM setting:", error);
-    showError("Error saving setting");
+    console.error("Error resetting WPM setting:", error);
+    showError("Error resetting setting");
   }
 }
 
 // Load stats and settings when popup opens
-window.addEventListener("load", () => {
-  loadWpmSetting();
+window.addEventListener("load", async () => {
+  await loadWpmSetting();
   analyzeCurrentPage();
 });
