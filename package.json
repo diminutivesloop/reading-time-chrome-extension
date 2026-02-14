@@ -1,0 +1,17 @@
+{
+  "name": "reading-time-chrome-extension",
+  "description": "Displays approximate reading time for articles and web pages",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch --sourceMap"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.1.36",
+    "typescript": "^5.9.3"
+  }
+}

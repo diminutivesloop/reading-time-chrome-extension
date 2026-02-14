@@ -7,22 +7,24 @@ A lightweight Chrome extension that displays the approximate reading time for ar
 ```
 reading-time-chrome-extension/
 ├── manifest.json           # Extension configuration
-├── content.js              # Content script for page analysis
-├── service-worker.js       # Background service worker
+├── content.ts              # Content script for page analysis
+├── service-worker.ts       # Background service worker
+├── tsconfig.json           # TypeScript configuration
 ├── popup/
 │   ├── popup.html         # Popup UI
 │   ├── popup.css          # Popup styling
-│   └── popup.js           # Popup logic
+│   └── popup.ts           # Popup logic
 └── README.md              # Documentation
 ```
 
 ## Installation & Setup
 
 1. Clone or download the extension folder
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable **Developer mode** (top-right toggle)
-4. Click **Load unpacked** and select the extension folder
-5. The extension icon will appear in your Chrome toolbar
+2. Run `bun install` and `bun run build` to compile TypeScript files
+3. Open Chrome and go to `chrome://extensions/`
+4. Enable **Developer mode** (top-right toggle)
+5. Click **Load unpacked** and select the extension folder
+6. The extension icon will appear in your Chrome toolbar
 
 Note: After reloading the extension the popup may not work until you refresh the current page because the content script is not automatically injected into already loaded pages. 
 
@@ -37,8 +39,8 @@ Note: After reloading the extension the popup may not work until you refresh the
 ## Configuration
 
 To adjust the reading speed calculation, modify the `WORDS_PER_MINUTE` constant in:
-- `popup/popup.js` (for popup display)
-- `content.js` (for indicator calculation)
+- `popup/popup.ts` (for popup display)
+- `content.ts` (for indicator calculation)
 
 Default: 200 words per minute
 
