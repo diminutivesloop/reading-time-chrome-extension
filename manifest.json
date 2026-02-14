@@ -6,7 +6,8 @@
   "description": "Displays approximate reading time for articles and web pages",
   "permissions": [
     "scripting",
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "action": {
     "default_popup": "popup/popup.html",

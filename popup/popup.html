@@ -20,6 +20,23 @@
             </div>
         </div>
         <button id="analyzeBtn" class="btn">Analyze Page</button>
+        
+        <div class="settings-section">
+            <label for="wpmInput">Words Per Minute:</label>
+            <div class="wpm-control">
+                <input 
+                    type="number" 
+                    id="wpmInput" 
+                    class="wpm-input"
+                    min="50"
+                    max="1000"
+                    step="10"
+                >
+                <button id="saveWpmBtn" class="btn-icon" title="Save">✓</button>
+            </div>
+        </div>
+
+        <div id="error"></div>
     </div>
     <script src="popup.js"></script>
 </body>

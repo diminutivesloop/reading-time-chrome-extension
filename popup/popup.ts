@@ -2,7 +2,7 @@
  * Popup script - handles user interaction with the extension popup
  */
 
-const WORDS_PER_MINUTE = 200; // Average reading speed
+const DEFAULT_WORDS_PER_MINUTE = 200; // Average reading speed
 
 interface PageStats {
     wordCount: number;
@@ -17,9 +17,24 @@ const analyzeBtn = document.getElementById('analyzeBtn') as HTMLButtonElement;
 const wordCountEl = document.getElementById('wordCount') as HTMLElement;
 const readingTimeEl = document.getElementById('readingTime') as HTMLElement;
 const statsDiv = document.getElementById('stats') as HTMLElement;
+const wpmInput = document.getElementById('wpmInput') as HTMLInputElement;
+const saveWpmBtn = document.getElementById('saveWpmBtn') as HTMLButtonElement;
+const errorEl = document.getElementById('error') as HTMLElement;
 
 if (analyzeBtn) {
     analyzeBtn.addEventListener('click', analyzeCurrentPage);
+}
+
+if (saveWpmBtn) {
+    saveWpmBtn.addEventListener('click', saveWpmSetting);
+}
+
+if (wpmInput) {
+    wpmInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            saveWpmSetting();
+        }
+    });
 }
 
 /**
@@ -44,18 +59,28 @@ async function analyzeCurrentPage(): Promise<void> {
     }
 }
 
+async function getWordsPerMinute(): Promise<number> {
+    const { wordsPerMinute } = await chrome.storage.sync.get<{ wordsPerMinute: number }>({ wordsPerMinute: DEFAULT_WORDS_PER_MINUTE });
+    return wordsPerMinute;
+}
+
 /**
  * Display statistics on the popup
  */
-function displayStats(stats: PageStats): void {
-    const { wordCount } = stats;
-    const readingTime = Math.ceil(wordCount / WORDS_PER_MINUTE);
-    
-    if (wordCountEl) {
-        wordCountEl.textContent = wordCount.toLocaleString();
-    }
-    if (readingTimeEl) {
-        readingTimeEl.textContent = readingTime === 1 ? '< 1 min' : `${readingTime} min`;
+async function displayStats(stats: PageStats): Promise<void> {
+    try {
+        const { wordCount } = stats;
+        const readingTime = Math.ceil(wordCount / await getWordsPerMinute());
+        
+        if (wordCountEl) {
+            wordCountEl.textContent = wordCount.toLocaleString();
+        }
+        if (readingTimeEl) {
+            readingTimeEl.textContent = readingTime === 1 ? '< 1 min' : `${readingTime} min`;
+        }
+    } catch (error) {
+        console.error('Error displaying stats:', error);
+        showError('Error calculating reading time');
     }
 }
 
@@ -70,16 +95,67 @@ function showError(message: string): void {
         readingTimeEl.textContent = '-';
     }
     
-    if (statsDiv) {
-        const errorEl = document.createElement('div');
-        errorEl.style.color = '#e74c3c';
-        errorEl.style.padding = '10px';
+    if (errorEl) {
         errorEl.textContent = message;
-        statsDiv.appendChild(errorEl);
+        errorEl.classList.add('show');
         
-        setTimeout(() => errorEl.remove(), 3000);
+        setTimeout(() => {
+            errorEl.classList.remove('show');
+        }, 3000);
     }
 }
 
-// Load stats when popup opens
-window.addEventListener('load', analyzeCurrentPage);
+/**
+ * Load and display the current WPM setting
+ */
+async function loadWpmSetting(): Promise<void> {
+    try {
+        if (wpmInput) {
+            wpmInput.value = (await getWordsPerMinute()).toString();
+        }
+    } catch (error) {
+        console.error('Error loading WPM setting:', error);
+    }
+}
+
+/**
+ * Save the WPM setting
+ */
+async function saveWpmSetting(): Promise<void> {
+    try {
+        const wpm = parseInt(wpmInput.value, 10);
+        
+        // Validate input
+        if (isNaN(wpm) || wpm < 50 || wpm > 1000) {
+            showError('Please enter a value between 50 and 1000');
+            return;
+        }
+
+        await chrome.storage.sync.set({ wordsPerMinute: wpm });
+        
+        // Show success feedback
+        if (saveWpmBtn) {
+            const originalText = saveWpmBtn.textContent;
+            saveWpmBtn.textContent = '✓ Saved';
+            saveWpmBtn.style.opacity = '0.8';
+            setTimeout(() => {
+                saveWpmBtn.textContent = originalText;
+                saveWpmBtn.style.opacity = '1';
+            }, 1500);
+        }
+        
+        // Re-analyze if stats are already shown
+        if (wordCountEl && wordCountEl.textContent !== '-') {
+            analyzeCurrentPage();
+        }
+    } catch (error) {
+        console.error('Error saving WPM setting:', error);
+        showError('Error saving setting');
+    }
+}
+
+// Load stats and settings when popup opens
+window.addEventListener('load', () => {
+    loadWpmSetting();
+    analyzeCurrentPage();
+});

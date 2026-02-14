@@ -74,3 +74,71 @@ h1 {
 .btn:active {
     transform: translateY(0);
 }
+.settings-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.settings-section label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.wpm-control {
+    display: flex;
+    gap: 8px;
+}
+
+.wpm-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: border-color 0.2s;
+}
+
+.wpm-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.btn-icon {
+    padding: 8px 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-icon:hover {
+    background: #5568d3;
+}
+
+.btn-icon:active {
+    background: #4c5ab8;
+}
+
+#error {
+    display: none;
+    margin-top: 20px;
+    padding: 10px;
+    background: #ffe0e0;
+    color: #d32f2f;
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+
+    &.show {
+        display: block;
+    }
+}
