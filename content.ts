@@ -68,39 +68,3 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-/**
- * Optional: Add reading time indicator to the page
- */
-function showReadingTimeIndicator(): void {
-    const stats = calculatePageStats();
-    const WORDS_PER_MINUTE = 200;
-    const readingTime = Math.ceil(stats.wordCount / WORDS_PER_MINUTE);
-    
-    // Create a small indicator (optional)
-    const indicator = document.createElement('div');
-    indicator.id = 'reading-time-indicator';
-    indicator.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #667eea;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        z-index: 10000;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    `;
-    indicator.textContent = `📖 ${readingTime} min read`;
-    
-    // Uncomment to enable automatic indicator display
-    // document.body.appendChild(indicator);
-}
-
-// Initialize when page loads
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', showReadingTimeIndicator);
-} else {
-    showReadingTimeIndicator();
-}
