@@ -41,6 +41,8 @@ if (wpmInput) {
  * Analyze the current page and display statistics
  */
 async function analyzeCurrentPage(): Promise<void> {
+    clearError();
+
     try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         
@@ -68,6 +70,8 @@ async function getWordsPerMinute(): Promise<number> {
  * Display statistics on the popup
  */
 async function displayStats(stats: PageStats): Promise<void> {
+    clearError();
+
     try {
         const { wordCount } = stats;
         const readingTime = Math.ceil(wordCount / await getWordsPerMinute());
@@ -98,10 +102,16 @@ function showError(message: string): void {
     if (errorEl) {
         errorEl.textContent = message;
         errorEl.classList.add('show');
-        
-        setTimeout(() => {
-            errorEl.classList.remove('show');
-        }, 3000);
+    }
+}
+
+/**
+ * Clear error message
+ */
+function clearError(): void {
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.remove('show');
     }
 }
 
@@ -122,6 +132,8 @@ async function loadWpmSetting(): Promise<void> {
  * Save the WPM setting
  */
 async function saveWpmSetting(): Promise<void> {
+    clearError();
+
     try {
         const wpm = parseInt(wpmInput.value, 10);
         
