@@ -2,11 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "TypeScript Watch",
-      "type": "shell",
-      "command": "bun",
-      "args": ["run", "watch"],
-      "isBackground": true,
+      "label": "tsc: watch - tsconfig.json",
+      "type": "typescript",
+      "tsconfig": "tsconfig.json",
+      "option": "watch",
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "group": "build",
       "runOptions": {
         "runOn": "folderOpen"
       }
