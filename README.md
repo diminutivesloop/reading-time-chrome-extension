@@ -47,7 +47,7 @@ Default: 200 words per minute
 
 ## Future Enhancements
 
-- [ ] Customizable reading speed
+- [x] Customizable reading speed
 - [ ] Reading time indicator on page
 - [ ] Show reading speed in tab titles
 - [ ] Measure actual reading speed
