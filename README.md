@@ -2,13 +2,6 @@
 
 A lightweight Chrome extension that displays the approximate reading time for articles and web pages.
 
-## Features
-
-- **Quick Analysis**: Click the extension icon to analyze the current page
-- **Reading Statistics**: Displays word count and estimated reading time
-- **Accurate Calculations**: Based on average reading speed of 200 words per minute
-- **Manifest V3**: Built with the latest Chrome Extension manifest version
-
 ## Project Structure
 
 ```
@@ -20,10 +13,6 @@ reading-time-chrome-extension/
 │   ├── popup.html         # Popup UI
 │   ├── popup.css          # Popup styling
 │   └── popup.js           # Popup logic
-├── icons/                 # Extension icons
-│   ├── icon-16.png       # 16x16 icon
-│   ├── icon-48.png       # 48x48 icon
-│   └── icon-128.png      # 128x128 icon
 └── README.md              # Documentation
 ```
 
@@ -35,6 +24,8 @@ reading-time-chrome-extension/
 4. Click **Load unpacked** and select the extension folder
 5. The extension icon will appear in your Chrome toolbar
 
+Note: After reloading the extension the popup may not work until you refresh the current page because the content script is not automatically injected into already loaded pages. 
+
 ## Usage
 
 1. Navigate to any web page
@@ -42,18 +33,6 @@ reading-time-chrome-extension/
 3. The popup will display:
    - **Word Count**: Total number of words on the page
    - **Reading Time**: Estimated time to read (in minutes)
-
-## Development
-
-### Key Files:
-- **manifest.json**: Defines extension permissions and scripts
-- **content.js**: Runs on web pages to calculate reading statistics
-- **service-worker.js**: Handles background events
-- **popup/**: Contains the extension's UI
-
-### Permissions:
-- `scripting`: Required to analyze page content
-- `activeTab`: Required to access the current tab
 
 ## Configuration
 
@@ -63,21 +42,11 @@ To adjust the reading speed calculation, modify the `WORDS_PER_MINUTE` constant 
 
 Default: 200 words per minute
 
-## Testing
-
-1. Install the extension using the setup steps above
-2. Navigate to different web pages and click the extension icon
-3. Verify that word count and reading time are calculated correctly
-
-## Browser Support
-
-- Chrome and Chromium-based browsers (Edge, Brave, etc.)
-
 ## Future Enhancements
 
+- [ ] Customizable reading speed
 - [ ] Reading time indicator on page
 - [ ] Show reading speed in tab titles
-- [ ] Customizable reading speed
-- [ ] Dark mode support
-- [ ] Better icons
-- [ ] Calculate actual reading speed based on user behavior
+- [ ] Measure actual reading speed
+- [ ] Custom selection of reading text
+- [ ] Debug mode that shows what text is analyzed and where the word boundaries are
