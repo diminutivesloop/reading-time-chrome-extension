@@ -3,20 +3,7 @@
  * Analyzes page content for reading statistics
  */
 
-interface PageStats {
-  wordCount: number;
-  textLength: number;
-}
-
-interface MessageRequest {
-  action: string;
-  enabled?: boolean;
-}
-
-interface MessageResponse {
-  stats?: PageStats;
-  debugActive?: boolean;
-}
+import type { PageStats, MessageRequest, MessageResponse } from "./types";
 
 const DEBUG_OUTLINE_OVERLAY_CLASS = "reading-time-debug-outline-overlay";
 const DEBUG_LABEL_CLASS = "reading-time-debug-label";
