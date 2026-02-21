@@ -54,4 +54,9 @@ Default: 200 words per minute
 - [ ] Show reading speed in tab titles
 - [ ] Measure actual reading speed
 - [ ] Custom selection of reading text
-- [ ] Debug mode that shows what text is analyzed and where the word boundaries are
+- [x] Debug mode that shows what text is analyzed and where the word boundaries are
+
+## Known Issues
+
+- Debug overlay may not position correctly on pages w/ dynamic content
+- Debug overlay word count is higher than popup count

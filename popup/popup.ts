@@ -11,6 +11,7 @@ interface PageStats {
 
 interface MessageResponse {
   stats?: PageStats;
+  debugActive?: boolean;
 }
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
@@ -21,6 +22,7 @@ const statsDiv = document.getElementById("stats") as HTMLElement;
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
 const resetWpmBtn = document.getElementById("resetWpmBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
+const debugModeEl = document.getElementById("debugMode") as HTMLInputElement;
 
 if (analyzeBtn) {
   analyzeBtn.addEventListener("click", async () => {
@@ -32,6 +34,12 @@ if (analyzeBtn) {
 
 if (resetWpmBtn) {
   resetWpmBtn.addEventListener("click", resetWpmSetting);
+}
+
+if (debugModeEl) {
+  debugModeEl.addEventListener("change", () => {
+    toggleDebugMode(debugModeEl.checked);
+  });
 }
 
 if (wpmInput) {
@@ -188,8 +196,54 @@ async function resetWpmSetting(): Promise<void> {
   }
 }
 
+/**
+ * Toggle debug mode on the active tab
+ */
+async function toggleDebugMode(enabled: boolean): Promise<void> {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tab.id) {
+      chrome.tabs.sendMessage(tab.id, {
+        action: "toggleDebug",
+        enabled,
+      });
+    }
+  } catch (error) {
+    console.error("Error toggling debug mode:", error);
+  }
+}
+
+/**
+ * Query the content script to check if debug mode is active on the current page
+ */
+async function loadDebugSetting(): Promise<void> {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tab.id && debugModeEl) {
+      chrome.tabs.sendMessage(
+        tab.id,
+        { action: "getDebugState" },
+        (response: MessageResponse) => {
+          debugModeEl.checked = !!response?.debugActive;
+        },
+      );
+    }
+  } catch (error) {
+    console.error("Error loading debug setting:", error);
+  }
+}
+
 // Load stats and settings when popup opens
 window.addEventListener("load", async () => {
+  loadDebugSetting();
   await loadWpmSetting();
   analyzeCurrentPage();
 });
