@@ -2,15 +2,12 @@
  * Popup script - handles user interaction with the extension popup
  */
 
-import type { PageStats, MessageResponse } from "../types";
-
 const DEFAULT_WORDS_PER_MINUTE = 200; // Average reading speed
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
 const wpmDisplayEl = document.getElementById("wpmDisplay") as HTMLElement;
-const statsDiv = document.getElementById("stats") as HTMLElement;
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
 const resetWpmBtn = document.getElementById("resetWpmBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;

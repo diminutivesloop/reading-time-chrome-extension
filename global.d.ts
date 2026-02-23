@@ -6,7 +6,7 @@
 /**
  * Page statistics from text analysis
  */
-export interface PageStats {
+interface PageStats {
   wordCount: number;
   textLength: number;
 }
@@ -14,7 +14,7 @@ export interface PageStats {
 /**
  * Message request sent to content script
  */
-export interface MessageRequest {
+interface MessageRequest {
   action: string;
   enabled?: boolean;
 }
@@ -22,7 +22,7 @@ export interface MessageRequest {
 /**
  * Message response from content script
  */
-export interface MessageResponse {
+interface MessageResponse {
   stats?: PageStats;
   debugActive?: boolean;
 }

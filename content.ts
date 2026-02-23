@@ -3,8 +3,6 @@
  * Analyzes page content for reading statistics
  */
 
-import type { PageStats, MessageRequest, MessageResponse } from "./types";
-
 const DEBUG_OUTLINE_OVERLAY_CLASS = "reading-time-debug-outline-overlay";
 const DEBUG_LABEL_CLASS = "reading-time-debug-label";
 const DEBUG_STYLE_ID = "reading-time-debug-style";
