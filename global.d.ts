@@ -9,6 +9,7 @@
 interface PageStats {
   wordCount: number;
   textLength: number;
+  readingTime?: number;
 }
 
 /**
@@ -17,6 +18,7 @@ interface PageStats {
 interface MessageRequest {
   action: string;
   enabled?: boolean;
+  wordsPerMinute?: number;
 }
 
 /**

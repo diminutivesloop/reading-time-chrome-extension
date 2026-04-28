@@ -8,6 +8,9 @@ const DEBUG_LABEL_CLASS = "reading-time-debug-label";
 const DEBUG_STYLE_ID = "reading-time-debug-style";
 const DEBUG_WORD_CLASS = "reading-time-debug-word";
 
+let originalPageTitle = document.title;
+let lastAppliedReadingTitle: string | null = null;
+
 /**
  * Check if debug mode is currently active on this page
  */
@@ -215,7 +218,7 @@ function countWords(text: string): number {
 /**
  * Calculate reading statistics
  */
-function calculatePageStats(): PageStats {
+function calculatePageStats(wordsPerMinute?: number): PageStats {
   const pageText = getPageText();
 
   const stats: PageStats = {
@@ -223,7 +226,25 @@ function calculatePageStats(): PageStats {
     textLength: pageText.length,
   };
 
+  if (wordsPerMinute && wordsPerMinute > 0) {
+    stats.readingTime = Math.ceil(stats.wordCount / wordsPerMinute);
+  }
+
   return stats;
+}
+
+/**
+ * Prepend the latest estimate to the saved page title
+ */
+function appendReadingTimeToTitle(readingTimeLabel: string): void {
+  // If the page changed its own title, refresh the saved original title.
+  if (!lastAppliedReadingTitle || document.title !== lastAppliedReadingTitle) {
+    originalPageTitle = document.title;
+  }
+
+  const updatedTitle = `[${readingTimeLabel}] ${originalPageTitle}`;
+  document.title = updatedTitle;
+  lastAppliedReadingTitle = updatedTitle;
 }
 
 /**
@@ -236,7 +257,12 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response: MessageResponse) => void,
   ) => {
     if (request.action === "getPageStats") {
-      const stats = calculatePageStats();
+      const stats = calculatePageStats(request.wordsPerMinute);
+      if (typeof stats.readingTime === "number") {
+        appendReadingTimeToTitle(
+          stats.readingTime <= 1 ? "<1m" : `${stats.readingTime}m`,
+        );
+      }
       sendResponse({ stats });
     } else if (request.action === "toggleDebug") {
       if (request.enabled) {

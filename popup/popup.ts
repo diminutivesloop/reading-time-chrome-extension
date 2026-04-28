@@ -68,6 +68,7 @@ async function analyzeCurrentPage(): Promise<void> {
   clearError();
 
   try {
+    const wpm = await getWordsPerMinute();
     const [tab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
@@ -76,7 +77,7 @@ async function analyzeCurrentPage(): Promise<void> {
     if (tab.id) {
       chrome.tabs.sendMessage(
         tab.id,
-        { action: "getPageStats" },
+        { action: "getPageStats", wordsPerMinute: wpm },
         (response: MessageResponse) => {
           if (response && response.stats) {
             displayStats(response.stats);
@@ -108,14 +109,14 @@ async function displayStats(stats: PageStats): Promise<void> {
   try {
     const { wordCount } = stats;
     const wpm = await getWordsPerMinute();
-    const readingTime = Math.ceil(wordCount / wpm);
+    const readingTime = stats.readingTime;
 
     if (wordCountEl) {
       wordCountEl.textContent = wordCount.toLocaleString();
     }
-    if (readingTimeEl) {
+    if (readingTimeEl && typeof readingTime === "number") {
       readingTimeEl.textContent =
-        readingTime === 1 ? "< 1 min" : `${readingTime} min`;
+        readingTime <= 1 ? "< 1 min" : `${readingTime} min`;
     }
     if (wpmDisplayEl) {
       wpmDisplayEl.textContent = wpm.toString();
