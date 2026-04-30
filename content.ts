@@ -10,6 +10,8 @@ const DEBUG_WORD_CLASS = "reading-time-debug-word";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";
 const TIMER_STYLE_ID = "reading-time-speed-timer-style";
+const MIN_WORDS_PER_MINUTE = 50;
+const MAX_WORDS_PER_MINUTE = 1000;
 
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
@@ -222,6 +224,17 @@ function countWords(text: string): number {
 }
 
 /**
+ * Validate that a WPM value is within the supported range
+ */
+function isValidWordsPerMinute(wpm: number): boolean {
+  return (
+    !Number.isNaN(wpm) &&
+    wpm >= MIN_WORDS_PER_MINUTE &&
+    wpm <= MAX_WORDS_PER_MINUTE
+  );
+}
+
+/**
  * Calculate reading statistics
  */
 function calculatePageStats(wordsPerMinute?: number): PageStats {
@@ -400,6 +413,12 @@ function showResultBar(measuredWpm: number): void {
 
   const saveBtn = bar.querySelector<HTMLButtonElement>(".rt-btn-save")!;
   saveBtn.addEventListener("click", async () => {
+    if (!isValidWordsPerMinute(measuredWpm)) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = `Out of range (${MIN_WORDS_PER_MINUTE}-${MAX_WORDS_PER_MINUTE})`;
+      return;
+    }
+
     saveBtn.disabled = true;
     saveBtn.textContent = "Saved ✓";
     await chrome.storage.sync.set({ wordsPerMinute: measuredWpm });
