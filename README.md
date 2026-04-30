@@ -13,11 +13,13 @@ reading-time-chrome-extension/
 ├── tsconfig.json           # TypeScript configuration
 ├── global.d.ts             # Shared TypeScript type declarations
 ├── src/
-│   ├── content.ts          # Content script for page analysis
+│   ├── content.ts          # Content script: message routing, stats, title management
+│   ├── debug.ts            # Debug mode feature module
+│   ├── speed-test.ts       # Reading speed test feature module
+│   ├── shared.ts            # Shared utilities and constants
 │   ├── popup.html          # Popup UI
 │   ├── popup.css           # Popup styling
-│   ├── popup.ts            # Popup logic
-│   └── utils.ts            # Shared utilities and constants
+│   └── popup.ts            # Popup logic
 └── README.md               # Documentation
 ```
 

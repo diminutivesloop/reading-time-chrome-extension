@@ -27,3 +27,23 @@ export function isValidWordsPerMinute(wpm: number): boolean {
     wpm <= MAX_WORDS_PER_MINUTE
   );
 }
+
+/**
+ * Get the element used for text extraction
+ */
+export function getTextElement(): Element {
+  let mainElement = document.querySelector("main");
+  if (!mainElement) {
+    mainElement = document.querySelector('[role="main"]');
+  }
+  return mainElement || document.body;
+}
+
+/**
+ * Extract text content from the page
+ */
+export function getPageText(): string {
+  const textElement = getTextElement();
+  const bodyText = (textElement as HTMLElement).innerText;
+  return bodyText || "";
+}

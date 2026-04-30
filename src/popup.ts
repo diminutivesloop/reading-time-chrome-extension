@@ -2,7 +2,7 @@
  * Popup script - handles user interaction with the extension popup
  */
 
-import { DEFAULT_WORDS_PER_MINUTE } from "./utils";
+import { DEFAULT_WORDS_PER_MINUTE } from "./shared";
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
