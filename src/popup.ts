@@ -2,7 +2,7 @@
  * Popup script - handles user interaction with the extension popup
  */
 
-const DEFAULT_WORDS_PER_MINUTE = 200; // Average reading speed
+import { DEFAULT_WORDS_PER_MINUTE } from "./utils";
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;

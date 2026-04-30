@@ -3,6 +3,13 @@
  * Analyzes page content for reading statistics
  */
 
+import {
+  MIN_WORDS_PER_MINUTE,
+  MAX_WORDS_PER_MINUTE,
+  countWords,
+  isValidWordsPerMinute,
+} from "./utils";
+
 const DEBUG_OUTLINE_OVERLAY_CLASS = "reading-time-debug-outline-overlay";
 const DEBUG_LABEL_CLASS = "reading-time-debug-label";
 const DEBUG_STYLE_ID = "reading-time-debug-style";
@@ -10,8 +17,6 @@ const DEBUG_WORD_CLASS = "reading-time-debug-word";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";
 const TIMER_STYLE_ID = "reading-time-speed-timer-style";
-const MIN_WORDS_PER_MINUTE = 50;
-const MAX_WORDS_PER_MINUTE = 1000;
 
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
@@ -210,28 +215,6 @@ function disableDebugMode(): void {
 
   // Remove injected style
   document.getElementById(DEBUG_STYLE_ID)?.remove();
-}
-
-/**
- * Count words in text
- */
-function countWords(text: string): number {
-  const words = text
-    .trim()
-    .split(/\s+/)
-    .filter((word) => word.length > 0);
-  return words.length;
-}
-
-/**
- * Validate that a WPM value is within the supported range
- */
-function isValidWordsPerMinute(wpm: number): boolean {
-  return (
-    !Number.isNaN(wpm) &&
-    wpm >= MIN_WORDS_PER_MINUTE &&
-    wpm <= MAX_WORDS_PER_MINUTE
-  );
 }
 
 /**
