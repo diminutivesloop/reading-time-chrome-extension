@@ -9,7 +9,7 @@
 interface PageStats {
   wordCount: number;
   textLength: number;
-  readingTime?: number;
+  readingMinutes?: number;
 }
 
 /**

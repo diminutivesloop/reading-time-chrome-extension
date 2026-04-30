@@ -246,7 +246,7 @@ function calculatePageStats(wordsPerMinute?: number): PageStats {
   };
 
   if (wordsPerMinute && wordsPerMinute > 0) {
-    stats.readingTime = Math.ceil(stats.wordCount / wordsPerMinute);
+    stats.readingMinutes = Math.ceil(stats.wordCount / wordsPerMinute);
   }
 
   return stats;
@@ -255,12 +255,13 @@ function calculatePageStats(wordsPerMinute?: number): PageStats {
 /**
  * Prepend the latest estimate to the saved page title
  */
-function appendReadingTimeToTitle(readingTimeLabel: string): void {
+function appendReadingTimeToTitle(minutes: number): void {
   // If the page changed its own title, refresh the saved original title.
   if (!lastAppliedReadingTitle || document.title !== lastAppliedReadingTitle) {
     originalPageTitle = document.title;
   }
 
+  const readingTimeLabel = minutes <= 1 ? "<1m" : `${minutes}m`;
   const updatedTitle = `[${readingTimeLabel}] ${originalPageTitle}`;
   document.title = updatedTitle;
   lastAppliedReadingTitle = updatedTitle;
@@ -423,10 +424,8 @@ function showResultBar(measuredWpm: number): void {
     saveBtn.textContent = "Saved ✓";
     await chrome.storage.sync.set({ wordsPerMinute: measuredWpm });
     const stats = calculatePageStats(measuredWpm);
-    if (typeof stats.readingTime === "number") {
-      appendReadingTimeToTitle(
-        stats.readingTime <= 1 ? "<1m" : `${stats.readingTime}m`,
-      );
+    if (typeof stats.readingMinutes === "number") {
+      appendReadingTimeToTitle(stats.readingMinutes);
     }
   });
 
@@ -519,10 +518,8 @@ chrome.runtime.onMessage.addListener(
   ) => {
     if (request.action === "getPageStats") {
       const stats = calculatePageStats(request.wordsPerMinute);
-      if (typeof stats.readingTime === "number") {
-        appendReadingTimeToTitle(
-          stats.readingTime <= 1 ? "<1m" : `${stats.readingTime}m`,
-        );
+      if (typeof stats.readingMinutes === "number") {
+        appendReadingTimeToTitle(stats.readingMinutes);
       }
       sendResponse({ stats });
     } else if (request.action === "toggleDebug") {

@@ -116,7 +116,7 @@ async function displayStats(stats: PageStats): Promise<void> {
   try {
     const { wordCount } = stats;
     const wpm = await getWordsPerMinute();
-    const readingTime = stats.readingTime;
+    const readingTime = stats.readingMinutes;
 
     if (wordCountEl) {
       wordCountEl.textContent = wordCount.toLocaleString();
