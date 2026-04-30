@@ -3,15 +3,16 @@
   "description": "Displays approximate reading time for articles and web pages",
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch",
-    "dev": "tsc --watch --sourceMap"
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/chrome": "^0.1.36",
+    "esbuild": "^0.28.0",
     "typescript": "^5.9.3"
   }
 }

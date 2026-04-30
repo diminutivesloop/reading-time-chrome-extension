@@ -13,6 +13,21 @@
       "runOptions": {
         "runOn": "folderOpen"
       }
+    },
+    {
+      "label": "esbuild: watch",
+      "type": "npm",
+      "script": "watch",
+      "problemMatcher": [],
+      "group": "build",
+      "isBackground": true,
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated"
+      }
     }
   ]
 }
