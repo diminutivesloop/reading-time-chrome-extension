@@ -6,3 +6,4 @@
 - Use modern ES2022 syntax and features
 - Maintain clean separation of popup, content script, and background logic
 - Use concise class names and nesting when possible for css styles
+- When adding new files or modifying project structure, update the README.md project structure section accordingly
