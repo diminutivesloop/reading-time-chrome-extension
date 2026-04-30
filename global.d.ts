@@ -27,4 +27,5 @@ interface MessageRequest {
 interface MessageResponse {
   stats?: PageStats;
   debugActive?: boolean;
+  testActive?: boolean;
 }

@@ -12,6 +12,9 @@ const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
 const resetWpmBtn = document.getElementById("resetWpmBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
 const debugModeEl = document.getElementById("debugMode") as HTMLInputElement;
+const startSpeedTestBtn = document.getElementById(
+  "startSpeedTestBtn",
+) as HTMLButtonElement;
 
 if (analyzeBtn) {
   analyzeBtn.addEventListener("click", async () => {
@@ -29,6 +32,10 @@ if (debugModeEl) {
   debugModeEl.addEventListener("change", () => {
     toggleDebugMode(debugModeEl.checked);
   });
+}
+
+if (startSpeedTestBtn) {
+  startSpeedTestBtn.addEventListener("click", startReadingSpeedTest);
 }
 
 if (wpmInput) {
@@ -183,6 +190,41 @@ async function resetWpmSetting(): Promise<void> {
   } catch (error) {
     console.error("Error resetting WPM setting:", error);
     showError("Error resetting setting");
+  }
+}
+
+/**
+ * Send a start-reading-test message to the active tab's content script
+ */
+async function startReadingSpeedTest(): Promise<void> {
+  clearError();
+
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tab.id) {
+      chrome.tabs.sendMessage(
+        tab.id,
+        { action: "startReadingTest" },
+        (response: MessageResponse) => {
+          if (chrome.runtime.lastError) {
+            showError("Cannot start test on this page");
+            return;
+          }
+          if (!response?.testActive) {
+            showError("Could not start reading test");
+          } else {
+            window.close();
+          }
+        },
+      );
+    }
+  } catch (error) {
+    console.error("Error starting reading test:", error);
+    showError("Error starting reading test");
   }
 }
 

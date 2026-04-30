@@ -8,8 +8,14 @@ const DEBUG_LABEL_CLASS = "reading-time-debug-label";
 const DEBUG_STYLE_ID = "reading-time-debug-style";
 const DEBUG_WORD_CLASS = "reading-time-debug-word";
 
+const TIMER_BAR_ID = "reading-time-speed-timer";
+const TIMER_STYLE_ID = "reading-time-speed-timer-style";
+
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
+
+let testStartTime: number | null = null;
+let testIntervalId: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Check if debug mode is currently active on this page
@@ -248,6 +254,242 @@ function appendReadingTimeToTitle(readingTimeLabel: string): void {
 }
 
 /**
+ * Inject styles for the floating reading-speed timer bar
+ */
+function ensureTimerStyles(): void {
+  if (document.getElementById(TIMER_STYLE_ID)) return;
+  const style = document.createElement("style");
+  style.id = TIMER_STYLE_ID;
+  style.textContent = `
+    #${TIMER_BAR_ID} {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2147483647;
+      background: #1a1a2e;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 280px;
+      user-select: none;
+    }
+    #${TIMER_BAR_ID} .rt-timer-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+    #${TIMER_BAR_ID} .rt-timer-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    #${TIMER_BAR_ID} .rt-timer-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    #${TIMER_BAR_ID} .rt-timer-value {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #a78bfa;
+    }
+    #${TIMER_BAR_ID} .rt-timer-result {
+      font-size: 18px;
+      font-weight: 700;
+      color: #6ee7b7;
+    }
+    #${TIMER_BAR_ID} .rt-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    #${TIMER_BAR_ID} .rt-btn:hover { opacity: 0.85; }
+    #${TIMER_BAR_ID} .rt-btn:active { opacity: 0.7; }
+    #${TIMER_BAR_ID} .rt-btn-stop {
+      background: #6ee7b7;
+      color: #064e3b;
+    }
+    #${TIMER_BAR_ID} .rt-btn-save {
+      background: #6ee7b7;
+      color: #064e3b;
+    }
+    #${TIMER_BAR_ID} .rt-btn-save:disabled {
+      background: #6ee7b7;
+      color: #064e3b;
+      opacity: 0.5;
+      cursor: default;
+    }
+    #${TIMER_BAR_ID} .rt-btn-dismiss {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/**
+ * Format elapsed seconds as M:SS
+ */
+function formatElapsed(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Create and show the timer bar in "running" state
+ */
+function showTimerBar(): void {
+  removeTimerBar();
+  ensureTimerStyles();
+
+  const bar = document.createElement("div");
+  bar.id = TIMER_BAR_ID;
+
+  bar.innerHTML = `
+    <span class="rt-timer-icon">⏱</span>
+    <div class="rt-timer-body">
+      <span class="rt-timer-label">Reading Speed Test</span>
+      <span class="rt-timer-value">0:00</span>
+    </div>
+    <button class="rt-btn rt-btn-stop">Finish</button>
+    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">✕</button>
+  `;
+
+  document.body.appendChild(bar);
+
+  bar.querySelector(".rt-btn-stop")!.addEventListener("click", () => {
+    finishReadingTest();
+  });
+
+  bar.querySelector(".rt-btn-dismiss")!.addEventListener("click", () => {
+    cancelReadingTest();
+  });
+}
+
+/**
+ * Switch the timer bar to the "stopped / result" state
+ */
+function showResultBar(measuredWpm: number): void {
+  const bar = document.getElementById(TIMER_BAR_ID);
+  if (!bar) return;
+
+  bar.innerHTML = `
+    <span class="rt-timer-icon">📖</span>
+    <div class="rt-timer-body">
+      <span class="rt-timer-label">Your Reading Speed</span>
+      <span class="rt-timer-result">${measuredWpm.toLocaleString()} WPM</span>
+    </div>
+    <button class="rt-btn rt-btn-save">Save as WPM</button>
+    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">✕</button>
+  `;
+
+  const saveBtn = bar.querySelector<HTMLButtonElement>(".rt-btn-save")!;
+  saveBtn.addEventListener("click", async () => {
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saved ✓";
+    await chrome.storage.sync.set({ wordsPerMinute: measuredWpm });
+    const stats = calculatePageStats(measuredWpm);
+    if (typeof stats.readingTime === "number") {
+      appendReadingTimeToTitle(
+        stats.readingTime <= 1 ? "<1m" : `${stats.readingTime}m`,
+      );
+    }
+  });
+
+  bar.querySelector(".rt-btn-dismiss")!.addEventListener("click", () => {
+    removeTimerBar();
+  });
+}
+
+/**
+ * Remove the timer bar from the page
+ */
+function removeTimerBar(): void {
+  document.getElementById(TIMER_BAR_ID)?.remove();
+  document.getElementById(TIMER_STYLE_ID)?.remove();
+}
+
+/**
+ * Start the reading speed test
+ */
+function startReadingTest() {
+  if (testStartTime !== null) return;
+
+  testStartTime = Date.now();
+
+  showTimerBar();
+
+  testIntervalId = setInterval(() => {
+    const bar = document.getElementById(TIMER_BAR_ID);
+    const valueEl = bar?.querySelector(".rt-timer-value");
+    if (valueEl && testStartTime !== null) {
+      const elapsed = Math.floor((Date.now() - testStartTime) / 1000);
+      valueEl.textContent = formatElapsed(elapsed);
+    }
+  }, 1000);
+}
+
+/**
+ * Cancel the reading speed test without showing results
+ */
+function cancelReadingTest(): void {
+  if (testIntervalId !== null) {
+    clearInterval(testIntervalId);
+    testIntervalId = null;
+  }
+  testStartTime = null;
+  removeTimerBar();
+}
+
+/**
+ * Finish the reading speed test and compute measured WPM
+ */
+function finishReadingTest() {
+  if (testStartTime === null) return;
+
+  if (testIntervalId !== null) {
+    clearInterval(testIntervalId);
+    testIntervalId = null;
+  }
+
+  const elapsedSeconds = Math.max(
+    1,
+    Math.floor((Date.now() - testStartTime) / 1000),
+  );
+  const wordCount = countWords(getPageText());
+  const elapsedMinutes = elapsedSeconds / 60;
+  const measuredWpm = Math.max(1, Math.round(wordCount / elapsedMinutes));
+
+  testStartTime = null;
+
+  showResultBar(measuredWpm);
+}
+
+// Clean up if the page is being unloaded
+window.addEventListener("pagehide", () => {
+  if (testIntervalId !== null) {
+    clearInterval(testIntervalId);
+    testIntervalId = null;
+  }
+  testStartTime = null;
+});
+
+/**
  * Listen for messages from the popup
  */
 chrome.runtime.onMessage.addListener(
@@ -272,6 +514,9 @@ chrome.runtime.onMessage.addListener(
       }
     } else if (request.action === "getDebugState") {
       sendResponse({ debugActive: isDebugActive() });
+    } else if (request.action === "startReadingTest") {
+      startReadingTest();
+      sendResponse({ testActive: true });
     }
   },
 );

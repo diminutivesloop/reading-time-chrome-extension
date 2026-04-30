@@ -52,7 +52,7 @@ Default: 200 words per minute
 - [x] Customizable reading speed
 - [ ] Reading time indicator on page
 - [ ] Show reading speed in tab titles
-- [ ] Measure actual reading speed
+- [x] Measure actual reading speed
 - [ ] Custom selection of reading text
 - [x] Debug mode that shows what text is analyzed and where the word boundaries are
 

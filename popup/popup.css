@@ -54,6 +54,21 @@ h1 {
   }
 }
 
+.btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+
+  &:hover {
+    background: #f0f2ff;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  }
+
+  &:active {
+    background: #e8ebff;
+  }
+}
+
 .btn-icon {
   padding: 8px 12px;
   background: #667eea;
