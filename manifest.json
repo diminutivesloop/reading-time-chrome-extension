@@ -8,7 +8,7 @@
     "storage"
   ],
   "action": {
-    "default_popup": "popup/popup.html",
+    "default_popup": "popup.html",
     "default_title": "Reading Time"
   },
   "content_scripts": [

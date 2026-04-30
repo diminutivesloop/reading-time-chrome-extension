@@ -1,5 +1,5 @@
 import esbuild from "esbuild";
-import { cp, mkdir, rm } from "fs/promises";
+import { cp, rm } from "fs/promises";
 
 const isWatch = process.argv.includes("--watch");
 const outdir = "dist";
@@ -7,8 +7,8 @@ const outdir = "dist";
 /** @type {import("esbuild").BuildOptions} */
 const buildOptions = {
   entryPoints: {
-    content: "content.ts",
-    "popup/popup": "popup/popup.ts",
+    content: "src/content.ts",
+    popup: "src/popup.ts",
   },
   bundle: true,
   outdir,
@@ -20,11 +20,10 @@ const buildOptions = {
 };
 
 async function copyAssets() {
-  await mkdir(`${outdir}/popup`, { recursive: true });
   await Promise.all([
     cp("manifest.json", `${outdir}/manifest.json`),
-    cp("popup/popup.html", `${outdir}/popup/popup.html`),
-    cp("popup/popup.css", `${outdir}/popup/popup.css`),
+    cp("src/popup.html", `${outdir}/popup.html`),
+    cp("src/popup.css", `${outdir}/popup.css`),
   ]);
 }
 

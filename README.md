@@ -22,7 +22,7 @@ reading-time-chrome-extension/
 ## Installation & Setup
 
 1. Clone or download the extension folder
-2. Run `bun install` and `bun run build` to compile TypeScript files
+2. Run `bun install` and `bun run build` to compile and bundle TypeScript files
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer mode** (top-right toggle)
 5. Click **Load unpacked** and select the extension folder
@@ -51,7 +51,7 @@ Default: 200 words per minute
 
 - [x] Customizable reading speed
 - [ ] Reading time indicator on page
-- [ ] Show reading speed in tab titles
+- [x] Show reading time in tab titles
 - [x] Measure actual reading speed
 - [ ] Custom selection of reading text
 - [x] Debug mode that shows what text is analyzed and where the word boundaries are
