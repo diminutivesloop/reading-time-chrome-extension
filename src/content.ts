@@ -55,7 +55,7 @@ chrome.runtime.onMessage.addListener(
   (
     request: MessageRequest,
     _,
-    sendResponse: (response: MessageResponse) => void,
+    sendResponse: (response?: MessageResponse) => void,
   ) => {
     if (request.action === "getPageStats") {
       const stats = calculatePageStats(request.wordsPerMinute);
@@ -69,6 +69,7 @@ chrome.runtime.onMessage.addListener(
       } else {
         disableDebugMode();
       }
+      sendResponse();
     } else if (request.action === "getDebugState") {
       sendResponse({ action: "getDebugState", debugActive: isDebugActive() });
     } else if (request.action === "startReadingTest") {
@@ -78,7 +79,7 @@ chrome.runtime.onMessage.addListener(
           appendReadingTimeToTitle(stats.readingMinutes);
         }
       });
+      sendResponse();
     }
-    return true;
   },
 );
