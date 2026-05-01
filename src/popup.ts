@@ -3,6 +3,15 @@
  */
 
 import {
+  GetDebugStateMessage,
+  GetDebugStateResponse,
+  GetPageStatsMessage,
+  StartReadingTestMessage,
+  ToggleDebugMessage,
+  type GetPageStatsResponse,
+} from "./messages";
+import type { PageStats } from "./page-stats";
+import {
   MIN_WORDS_PER_MINUTE,
   MAX_WORDS_PER_MINUTE,
   isValidWordsPerMinute,
@@ -93,15 +102,15 @@ async function analyzeCurrentPage(): Promise<void> {
     });
 
     if (tab.id) {
-      chrome.tabs.sendMessage(
+      chrome.tabs.sendMessage<GetPageStatsMessage, GetPageStatsResponse>(
         tab.id,
         { action: "getPageStats", wordsPerMinute: wpm },
-        (response: MessageResponse) => {
-          if (response && response.stats) {
-            displayStats(response.stats);
-          } else {
-            showError("Could not analyze page");
+        (response) => {
+          if (chrome.runtime.lastError) {
+            showError("Error analyzing page");
+            return;
           }
+          displayStats(response.stats);
         },
       );
     }
@@ -208,19 +217,15 @@ async function startReadingSpeedTest(): Promise<void> {
     });
 
     if (tab.id) {
-      chrome.tabs.sendMessage(
+      chrome.tabs.sendMessage<StartReadingTestMessage>(
         tab.id,
         { action: "startReadingTest" },
-        (response: MessageResponse) => {
+        () => {
           if (chrome.runtime.lastError) {
-            showError("Cannot start test on this page");
+            showError("Error starting reading test");
             return;
           }
-          if (!response?.testActive) {
-            showError("Could not start reading test");
-          } else {
-            window.close();
-          }
+          window.close();
         },
       );
     }
@@ -241,10 +246,18 @@ async function toggleDebugMode(enabled: boolean): Promise<void> {
     });
 
     if (tab.id) {
-      chrome.tabs.sendMessage(tab.id, {
-        action: "toggleDebug",
-        enabled,
-      });
+      chrome.tabs.sendMessage<ToggleDebugMessage>(
+        tab.id,
+        {
+          action: "toggleDebug",
+          enabled,
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            showError("Error toggling debug mode");
+          }
+        },
+      );
     }
   } catch (error) {
     console.error("Error toggling debug mode:", error);
@@ -262,11 +275,14 @@ async function loadDebugSetting(): Promise<void> {
     });
 
     if (tab.id && debugModeEl) {
-      chrome.tabs.sendMessage(
+      chrome.tabs.sendMessage<GetDebugStateMessage, GetDebugStateResponse>(
         tab.id,
         { action: "getDebugState" },
-        (response: MessageResponse) => {
-          debugModeEl.checked = !!response?.debugActive;
+        (response) => {
+          if (chrome.runtime.lastError) {
+            return;
+          }
+          debugModeEl.checked = response.debugActive;
         },
       );
     }

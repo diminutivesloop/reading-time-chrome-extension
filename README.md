@@ -11,12 +11,14 @@ reading-time-chrome-extension/
 ├── manifest.json           # Extension configuration
 ├── esbuild.mjs             # Build script
 ├── tsconfig.json           # TypeScript configuration
-├── global.d.ts             # Shared TypeScript type declarations
 ├── src/
 │   ├── content.ts          # Content script: message routing, stats, title management
 │   ├── debug.ts            # Debug mode feature module
+│   ├── messages.ts         # Message request/response types
+│   ├── page-stats.ts       # Shared page statistics types
 │   ├── speed-test.ts       # Reading speed test feature module
 │   ├── shared.ts            # Shared utilities and constants
+│   ├── wpm-storage.ts      # Reading-speed storage helpers
 │   ├── popup.html          # Popup UI
 │   ├── popup.css           # Popup styling
 │   └── popup.ts            # Popup logic
@@ -46,7 +48,7 @@ Note: After reloading the extension the popup may not work until you refresh the
 
 To adjust the reading speed calculation, modify the `DEFAULT_WORDS_PER_MINUTE` constant in:
 
-- `src/utils.ts`
+- `src/wpm-storage.ts`
 
 Default: 200 words per minute
 

@@ -3,6 +3,8 @@
  * Analyzes page content for reading statistics
  */
 
+import type { MessageRequest, MessageResponse } from "./messages";
+import type { PageStats } from "./page-stats";
 import { countWords, getPageText } from "./shared";
 import { isDebugActive, enableDebugMode, disableDebugMode } from "./debug";
 import { startReadingTest, cancelReadingTest } from "./speed-test";
@@ -60,7 +62,7 @@ chrome.runtime.onMessage.addListener(
       if (typeof stats.readingMinutes === "number") {
         appendReadingTimeToTitle(stats.readingMinutes);
       }
-      sendResponse({ stats });
+      sendResponse({ action: "getPageStats", stats });
     } else if (request.action === "toggleDebug") {
       if (request.enabled) {
         enableDebugMode();
@@ -68,7 +70,7 @@ chrome.runtime.onMessage.addListener(
         disableDebugMode();
       }
     } else if (request.action === "getDebugState") {
-      sendResponse({ debugActive: isDebugActive() });
+      sendResponse({ action: "getDebugState", debugActive: isDebugActive() });
     } else if (request.action === "startReadingTest") {
       startReadingTest((wpm) => {
         const stats = calculatePageStats(wpm);
@@ -76,7 +78,6 @@ chrome.runtime.onMessage.addListener(
           appendReadingTimeToTitle(stats.readingMinutes);
         }
       });
-      sendResponse({ testActive: true });
     }
   },
 );
