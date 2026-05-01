@@ -2,7 +2,12 @@
  * Popup script - handles user interaction with the extension popup
  */
 
-import { DEFAULT_WORDS_PER_MINUTE } from "./shared";
+import {
+  DEFAULT_WORDS_PER_MINUTE,
+  MIN_WORDS_PER_MINUTE,
+  MAX_WORDS_PER_MINUTE,
+  isValidWordsPerMinute,
+} from "./shared";
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
@@ -58,8 +63,10 @@ async function saveWpmSetting(): Promise<boolean> {
   const wpm = parseInt(wpmInput.value, 10);
 
   // Validate input
-  if (isNaN(wpm) || wpm < 50 || wpm > 1000) {
-    showError("Please enter a value between 50 and 1000");
+  if (!isValidWordsPerMinute(wpm)) {
+    showError(
+      `Please enter a value between ${MIN_WORDS_PER_MINUTE} and ${MAX_WORDS_PER_MINUTE}`,
+    );
     return false;
   }
 
