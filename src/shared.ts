@@ -35,7 +35,8 @@ export function getTextElement(): Element {
   if (!mainElement) {
     mainElement = document.querySelector('[role="main"]');
   }
-  return mainElement || document.body;
+  const articleElement = mainElement?.querySelector("article");
+  return articleElement || mainElement || document.body;
 }
 
 /**
