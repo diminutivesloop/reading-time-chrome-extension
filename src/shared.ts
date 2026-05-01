@@ -4,7 +4,6 @@
 
 export const MIN_WORDS_PER_MINUTE = 50;
 export const MAX_WORDS_PER_MINUTE = 1000;
-export const DEFAULT_WORDS_PER_MINUTE = 200;
 
 /**
  * Count words in text

@@ -3,11 +3,15 @@
  */
 
 import {
-  DEFAULT_WORDS_PER_MINUTE,
   MIN_WORDS_PER_MINUTE,
   MAX_WORDS_PER_MINUTE,
   isValidWordsPerMinute,
 } from "./shared";
+import {
+  getWordsPerMinute,
+  setWordsPerMinute,
+  resetWordsPerMinute,
+} from "./wpm-storage";
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
@@ -71,7 +75,7 @@ async function saveWpmSetting(): Promise<boolean> {
   }
 
   // Save the WPM setting
-  await chrome.storage.sync.set({ wordsPerMinute: wpm });
+  await setWordsPerMinute(wpm);
   return true;
 }
 
@@ -105,13 +109,6 @@ async function analyzeCurrentPage(): Promise<void> {
     console.error("Error:", error);
     showError("Error analyzing page");
   }
-}
-
-async function getWordsPerMinute(): Promise<number> {
-  const { wordsPerMinute } = await chrome.storage.sync.get<{
-    wordsPerMinute: number;
-  }>({ wordsPerMinute: DEFAULT_WORDS_PER_MINUTE });
-  return wordsPerMinute;
 }
 
 /**
@@ -181,13 +178,11 @@ async function resetWpmSetting(): Promise<void> {
   clearError();
 
   try {
-    await chrome.storage.sync.set({
-      wordsPerMinute: DEFAULT_WORDS_PER_MINUTE,
-    });
+    const wpm = await resetWordsPerMinute();
 
     // Update the input to show the default value
     if (wpmInput) {
-      wpmInput.value = DEFAULT_WORDS_PER_MINUTE.toString();
+      wpmInput.value = wpm.toString();
     }
 
     // Re-analyze if stats are already shown
