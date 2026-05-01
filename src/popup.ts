@@ -107,6 +107,7 @@ async function analyzeCurrentPage(): Promise<void> {
         { action: "getPageStats", wordsPerMinute: wpm },
         (response) => {
           if (chrome.runtime.lastError) {
+            console.error("Error analyzing page:", chrome.runtime.lastError);
             showError("Error analyzing page");
             return;
           }
@@ -177,6 +178,7 @@ async function loadWpmSetting(): Promise<void> {
     }
   } catch (error) {
     console.error("Error loading WPM setting:", error);
+    showError("Error loading WPM setting");
   }
 }
 
@@ -222,6 +224,10 @@ async function startReadingSpeedTest(): Promise<void> {
         { action: "startReadingTest" },
         () => {
           if (chrome.runtime.lastError) {
+            console.error(
+              "Error starting reading test:",
+              chrome.runtime.lastError,
+            );
             showError("Error starting reading test");
             return;
           }
@@ -254,6 +260,10 @@ async function toggleDebugMode(enabled: boolean): Promise<void> {
         },
         () => {
           if (chrome.runtime.lastError) {
+            console.error(
+              "Error toggling debug mode:",
+              chrome.runtime.lastError,
+            );
             showError("Error toggling debug mode");
           }
         },
@@ -261,6 +271,7 @@ async function toggleDebugMode(enabled: boolean): Promise<void> {
     }
   } catch (error) {
     console.error("Error toggling debug mode:", error);
+    showError("Error toggling debug mode");
   }
 }
 
@@ -280,6 +291,11 @@ async function loadDebugSetting(): Promise<void> {
         { action: "getDebugState" },
         (response) => {
           if (chrome.runtime.lastError) {
+            console.error(
+              "Error loading debug state:",
+              chrome.runtime.lastError,
+            );
+            showError("Error loading debug state");
             return;
           }
           debugModeEl.checked = response.debugActive;
@@ -288,6 +304,7 @@ async function loadDebugSetting(): Promise<void> {
     }
   } catch (error) {
     console.error("Error loading debug setting:", error);
+    showError("Error loading debug setting");
   }
 }
 
