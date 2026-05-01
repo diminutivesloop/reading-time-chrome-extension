@@ -10,6 +10,7 @@ import {
   isValidWordsPerMinute,
   getPageText,
 } from "./shared";
+import { setWordsPerMinute } from "./wpm-storage";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";
 const TIMER_STYLE_ID = "reading-time-speed-timer-style";
@@ -173,7 +174,7 @@ function showResultBar(measuredWpm: number): void {
 
     saveBtn.disabled = true;
     saveBtn.textContent = "Saved ✓";
-    await chrome.storage.sync.set({ wordsPerMinute: measuredWpm });
+    setWordsPerMinute(measuredWpm);
     onWpmSavedCallback?.(measuredWpm);
   });
 
