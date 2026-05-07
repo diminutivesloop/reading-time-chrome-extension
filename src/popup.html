@@ -10,6 +10,11 @@
     <div class="container">
       <h1>Reading Time</h1>
 
+      <div class="stats">
+        <div id="readingTime"></div>
+        <div id="wordCount"></div>
+      </div>
+
       <div class="settings-section">
         <label for="wpmInput">Words Per Minute:</label>
         <div class="control-wrapper">
@@ -25,21 +30,6 @@
       </div>
 
       <button id="analyzeBtn" class="btn btn-primary">Analyze Page</button>
-
-      <div id="stats">
-        <div class="item">
-          <span class="label">Words:</span>
-          <span id="wordCount" class="value">-</span>
-        </div>
-        <div class="item">
-          <span class="label">Reading Time:</span>
-          <span id="readingTime" class="value">-</span>
-        </div>
-        <div class="item">
-          <span class="label">WPM:</span>
-          <span id="wpmDisplay" class="value">-</span>
-        </div>
-      </div>
 
       <div id="error"></div>
 

@@ -25,7 +25,7 @@ body {
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 20px;
   color: #667eea;
   text-align: center;
 }
@@ -84,30 +84,21 @@ h1 {
   font-size: 16px;
 }
 
-#stats {
+.stats {
+  font-size: 30px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+}
 
-  .item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background: #f5f5f5;
-    border-radius: 6px;
-    border-left: 4px solid #667eea;
-  }
+#readingTime {
+  font-weight: 700;
+  color: #667eea;
+}
 
-  .label {
-    font-weight: 600;
-    color: #555;
-  }
-
-  .value {
-    font-weight: 700;
-    color: #667eea;
-    font-size: 16px;
-  }
+#wordCount {
+  font-weight: 600;
+  color: #666;
+  font-size: 20px;
 }
 
 .settings-section {

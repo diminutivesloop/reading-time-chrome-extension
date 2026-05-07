@@ -25,7 +25,6 @@ import {
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
-const wpmDisplayEl = document.getElementById("wpmDisplay") as HTMLElement;
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
 const resetWpmBtn = document.getElementById("resetWpmBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
@@ -133,18 +132,14 @@ async function displayStats(stats: PageStats): Promise<void> {
 
   try {
     const { wordCount } = stats;
-    const wpm = await getWordsPerMinute();
     const readingTime = stats.readingMinutes;
 
     if (wordCountEl) {
-      wordCountEl.textContent = wordCount.toLocaleString();
+      wordCountEl.textContent = `${wordCount.toLocaleString()} Words`;
     }
     if (readingTimeEl && typeof readingTime === "number") {
       readingTimeEl.textContent =
         readingTime <= 1 ? "< 1 min" : `${readingTime} min`;
-    }
-    if (wpmDisplayEl) {
-      wpmDisplayEl.textContent = wpm.toString();
     }
   } catch (error) {
     console.error("Error displaying stats:", error);
