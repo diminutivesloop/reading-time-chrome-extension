@@ -57,6 +57,10 @@ if (startSpeedTestBtn) {
 }
 
 if (wpmInput) {
+  wpmInput.addEventListener("focus", () => {
+    wpmInput.select();
+  });
+
   wpmInput.addEventListener("keypress", async (e) => {
     if (e.key === "Enter") {
       if (await saveWpmSetting()) {
