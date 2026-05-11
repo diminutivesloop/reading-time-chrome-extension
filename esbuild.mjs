@@ -1,5 +1,6 @@
 import esbuild from "esbuild";
 import { cp, rm } from "fs/promises";
+import { watch } from "fs";
 
 const isWatch = process.argv.includes("--watch");
 const outdir = "dist";
@@ -19,21 +20,32 @@ const buildOptions = {
   logLevel: "info",
 };
 
+const assetFiles = [
+  { src: "manifest.json", dest: `${outdir}/manifest.json` },
+  { src: "src/popup.html", dest: `${outdir}/popup.html` },
+  { src: "src/popup.css", dest: `${outdir}/popup.css` },
+];
+
 async function copyAssets() {
-  await Promise.all([
-    cp("manifest.json", `${outdir}/manifest.json`),
-    cp("src/popup.html", `${outdir}/popup.html`),
-    cp("src/popup.css", `${outdir}/popup.css`),
-  ]);
+  await Promise.all(assetFiles.map(({ src, dest }) => cp(src, dest)));
 }
+
+await rm(outdir, { recursive: true, force: true });
 
 if (isWatch) {
   await copyAssets();
   const ctx = await esbuild.context(buildOptions);
   await ctx.watch();
+
+  for (const { src, dest } of assetFiles) {
+    watch(src, async () => {
+      await cp(src, dest);
+      console.log(`Copied ${src} → ${dest}`);
+    });
+  }
+
   console.log("Watching for changes… (Ctrl-C to stop)");
 } else {
-  await rm(outdir, { recursive: true, force: true });
-  await esbuild.build(buildOptions);
   await copyAssets();
+  await esbuild.build(buildOptions);
 }
