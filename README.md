@@ -28,7 +28,7 @@ reading-time-chrome-extension/
 ## Installation & Setup
 
 1. Clone or download the extension folder
-2. Run `bun install` and `bun run build` to compile and bundle TypeScript files
+2. Run `npm install` and `npm run build` to compile and bundle TypeScript files
 3. Open Chrome and go to `chrome://extensions/`
 4. Enable **Developer mode** (top-right toggle)
 5. Click **Load unpacked** and select the extension folder
