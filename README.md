@@ -2,8 +2,6 @@
 
 A lightweight Chrome extension that displays the approximate reading time for articles and web pages.
 
-🤖 Built w/ substantial help from GitHub Copilot
-
 ## Project Structure
 
 ```
@@ -65,3 +63,5 @@ Default: 200 words per minute
 
 - Debug overlay may not position correctly on pages w/ dynamic content
 - Debug overlay word count is higher than popup count
+
+🤖 Built w/ help from AI
