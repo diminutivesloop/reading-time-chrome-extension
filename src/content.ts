@@ -52,7 +52,7 @@ export function getArticleText(): string {
 /**
  * Calculate reading statistics
  */
-function calculatePageStats(wordsPerMinute?: number): PageStats {
+export function calculatePageStats(wordsPerMinute?: number): PageStats {
   const pageText = getArticleText();
 
   const stats: PageStats = {

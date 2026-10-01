@@ -8,6 +8,7 @@ A lightweight Chrome extension that displays the approximate reading time for ar
 reading-time-chrome-extension/
 ├── manifest.json           # Extension configuration
 ├── esbuild.mjs             # Build script
+├── vitest.config.mts       # Unit test configuration
 ├── tsconfig.json           # TypeScript configuration
 ├── src/
 │   ├── content.ts          # Content script: message routing, stats, title management
@@ -21,6 +22,11 @@ reading-time-chrome-extension/
 │   ├── popup.html          # Popup UI
 │   ├── popup.css           # Popup styling
 │   └── popup.ts            # Popup logic
+├── tests/
+│   ├── setup.ts             # Shared Vitest Chrome API stubs
+│   ├── shared.test.ts       # Shared utility tests
+│   ├── content.test.ts      # Content extraction and statistics tests
+│   └── article-selection.test.ts # Article selection workflow tests
 └── README.md               # Documentation
 ```
 

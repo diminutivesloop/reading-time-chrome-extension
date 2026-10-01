@@ -56,7 +56,7 @@ function ensureDebugStyles(): void {
 /**
  * Build a short CSS selector string describing an element
  */
-function describeSelector(el: Element): string {
+export function describeSelector(el: Element): string {
   const tag = el.tagName.toLowerCase();
   let selector = tag;
   if (el.id) selector += `#${el.id}`;

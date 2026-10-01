@@ -4,10 +4,13 @@
  * the nearest common ancestor as the article container.
  */
 
-const SELECTION_STYLE_ID = "reading-time-article-selection-style";
-const SELECTION_HUD_ID = "reading-time-article-selection-hud";
-const HOVER_CLASS = "reading-time-article-selection-hover";
-const CONTAINER_CLASS = "reading-time-article-selection-container";
+export const SELECTION_STYLE_ID = "reading-time-article-selection-style";
+export const SELECTION_HUD_ID = "reading-time-article-selection-hud";
+export const HOVER_CLASS = "reading-time-article-selection-hover";
+export const CONTAINER_CLASS = "reading-time-article-selection-container";
+export const HUD_MESSAGE_CLASS = "rt-sel-msg";
+export const HUD_CANCEL_CLASS = "rt-sel-cancel";
+export const HUD_CONFIRM_CLASS = "rt-sel-confirm";
 
 let activeCleanup: (() => void) | null = null;
 
@@ -69,7 +72,7 @@ function ensureSelectionStyles(): void {
       white-space: nowrap;
     }
 
-    #${SELECTION_HUD_ID} .rt-sel-cancel {
+    #${SELECTION_HUD_ID} .${HUD_CANCEL_CLASS} {
       pointer-events: auto;
       background: #334155;
       color: #e2e8f0;
@@ -82,7 +85,7 @@ function ensureSelectionStyles(): void {
       line-height: 1.4;
     }
 
-    #${SELECTION_HUD_ID} .rt-sel-cancel:hover {
+    #${SELECTION_HUD_ID} .${HUD_CANCEL_CLASS}:hover {
       background: #475569;
     }
 
@@ -99,7 +102,7 @@ function ensureSelectionStyles(): void {
       background: rgba(34, 197, 94, 0.1) !important;
     }
 
-    #${SELECTION_HUD_ID} .rt-sel-confirm {
+    #${SELECTION_HUD_ID} .${HUD_CONFIRM_CLASS} {
       pointer-events: auto;
       background: #22c55e;
       color: #052e16;
@@ -112,7 +115,7 @@ function ensureSelectionStyles(): void {
       line-height: 1.4;
     }
 
-    #${SELECTION_HUD_ID} .rt-sel-confirm:hover {
+    #${SELECTION_HUD_ID} .${HUD_CONFIRM_CLASS}:hover {
       background: #16a34a;
     }
   `;
@@ -129,11 +132,11 @@ function showHud(text: string): HTMLDivElement {
   hud.id = SELECTION_HUD_ID;
 
   const msg = document.createElement("span");
-  msg.className = "rt-sel-msg";
+  msg.className = HUD_MESSAGE_CLASS;
   msg.textContent = text;
 
   const cancelBtn = document.createElement("button");
-  cancelBtn.className = "rt-sel-cancel";
+  cancelBtn.className = HUD_CANCEL_CLASS;
   cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
 
@@ -144,7 +147,7 @@ function showHud(text: string): HTMLDivElement {
 }
 
 function updateHud(hud: HTMLElement, text: string): void {
-  const msg = hud.querySelector(".rt-sel-msg");
+  const msg = hud.querySelector(`.${HUD_MESSAGE_CLASS}`);
   if (msg) msg.textContent = text;
 }
 
@@ -155,16 +158,16 @@ function switchHudToConfirmation(
 ): void {
   updateHud(hud, "Use this as the article container?");
 
-  hud.querySelector(".rt-sel-cancel")?.remove();
+  hud.querySelector(`.${HUD_CANCEL_CLASS}`)?.remove();
 
   const confirmBtn = document.createElement("button");
-  confirmBtn.className = "rt-sel-confirm";
+  confirmBtn.className = HUD_CONFIRM_CLASS;
   confirmBtn.type = "button";
   confirmBtn.textContent = "Confirm";
   confirmBtn.addEventListener("click", onConfirm);
 
   const cancelBtn = document.createElement("button");
-  cancelBtn.className = "rt-sel-cancel";
+  cancelBtn.className = HUD_CANCEL_CLASS;
   cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
   cancelBtn.addEventListener("click", onCancel);
@@ -293,7 +296,7 @@ export function startCustomArticleSelection(): Promise<HTMLElement> {
 
     const onClick = (event: MouseEvent): void => {
       const hudEl = document.getElementById(SELECTION_HUD_ID);
-      const cancelBtn = hudEl?.querySelector(".rt-sel-cancel");
+      const cancelBtn = hudEl?.querySelector(`.${HUD_CANCEL_CLASS}`);
       if (
         cancelBtn &&
         (event.target === cancelBtn || cancelBtn.contains(event.target as Node))
