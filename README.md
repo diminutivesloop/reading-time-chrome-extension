@@ -25,7 +25,7 @@ Note: After reloading the extension the popup may not work until you refresh the
 ## Usage
 
 1. Navigate to any web page
-2. Click the Reading Time extension icon to view popup w/ reading time and word count.
+2. Click the Reading Time extension icon to view popup w/ reading time and word count
 3. To override what text is treated as article text:
    - Click **Select Article Range** in the popup
    - Click the first paragraph of the article on the page
