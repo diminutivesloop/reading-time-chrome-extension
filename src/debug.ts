@@ -59,14 +59,14 @@ function ensureDebugStyles(): void {
 export function describeSelector(el: Element): string {
   const tag = el.tagName.toLowerCase();
   let selector = tag;
+  const role = el.getAttribute("role");
+  if (role) selector += `[role="${role}"]`;
   if (el.id) selector += `#${el.id}`;
   if (el.classList.length) {
     selector += Array.from(el.classList)
       .map((c) => `.${c}`)
       .join("");
   }
-  const role = el.getAttribute("role");
-  if (role) selector += `[role="${role}"]`;
   return selector;
 }
 

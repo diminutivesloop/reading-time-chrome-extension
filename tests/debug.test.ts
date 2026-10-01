@@ -9,7 +9,7 @@ describe("describeSelector", () => {
     article.setAttribute("role", "main");
 
     expect(describeSelector(article)).toBe(
-      'article#story.feature.primary[role="main"]',
+      'article[role="main"]#story.feature.primary',
     );
   });
 
