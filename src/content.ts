@@ -111,7 +111,7 @@ window.addEventListener("pagehide", () => {
  * Listen for messages from the popup
  */
 chrome.runtime.onMessage.addListener(
-  (
+  async (
     request: MessageRequest,
     _,
     sendResponse: (response?: MessageResponse) => void,
@@ -140,7 +140,7 @@ chrome.runtime.onMessage.addListener(
       });
       sendResponse();
     } else if (request.action === "startCustomArticleSelection") {
-      startCustomArticleSelection(applyCustomArticleSelection);
+      applyCustomArticleSelection(await startCustomArticleSelection());
       sendResponse();
     }
   },

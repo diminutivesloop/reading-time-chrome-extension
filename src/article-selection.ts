@@ -9,10 +9,6 @@ const SELECTION_HUD_ID = "reading-time-article-selection-hud";
 const HOVER_CLASS = "reading-time-article-selection-hover";
 const CONTAINER_CLASS = "reading-time-article-selection-container";
 
-type SelectionCompleteHandler = (
-  container: HTMLElement,
-) => void | Promise<void>;
-
 let activeCleanup: (() => void) | null = null;
 
 const SEMANTIC_TEXT_TAGS = new Set([
@@ -265,133 +261,131 @@ export function cancelCustomArticleSelection(): void {
   activeCleanup();
 }
 
-export function startCustomArticleSelection(
-  onComplete: SelectionCompleteHandler,
-): void {
-  cancelCustomArticleSelection();
-  ensureSelectionStyles();
+export function startCustomArticleSelection(): Promise<HTMLElement> {
+  return new Promise<HTMLElement>((resolve) => {
+    cancelCustomArticleSelection();
+    ensureSelectionStyles();
 
-  const hud = showHud(
-    "Click the first paragraph of the article. Press Esc to cancel.",
-  );
-  let hovered: HTMLElement | null = null;
-  let firstPick: HTMLElement | null = null;
-  let articleRoot: HTMLElement | null = null;
-
-  const setHovered = (next: HTMLElement | null): void => {
-    if (hovered === next) return;
-
-    if (hovered && hovered !== firstPick) {
-      hovered.classList.remove(HOVER_CLASS);
-    }
-
-    hovered = next;
-
-    if (hovered && hovered !== firstPick) {
-      hovered.classList.add(HOVER_CLASS);
-    }
-  };
-
-  const onMouseMove = (event: MouseEvent): void => {
-    setHovered(getReadableTargetFromEventTarget(event.target));
-  };
-
-  const onClick = (event: MouseEvent): void => {
-    const hudEl = document.getElementById(SELECTION_HUD_ID);
-    const cancelBtn = hudEl?.querySelector(".rt-sel-cancel");
-    if (
-      cancelBtn &&
-      (event.target === cancelBtn || cancelBtn.contains(event.target as Node))
-    ) {
-      event.stopImmediatePropagation();
-      cleanup();
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    const target = getReadableTargetFromEventTarget(event.target);
-    if (!target) {
-      return;
-    }
-
-    if (!firstPick) {
-      firstPick = target;
-      firstPick.classList.remove(HOVER_CLASS);
-      firstPick.classList.add(CONTAINER_CLASS);
-      updateHud(
-        hud,
-        "Now click the last paragraph of the article. Press Esc to cancel.",
-      );
-      return;
-    }
-
-    // Second pick — resolve container and enter confirmation phase
-    articleRoot = findNearestCommonAncestor(firstPick, target);
-
-    // Stop selection interaction (keydown stays active for Esc-to-cancel)
-    document.removeEventListener("mousemove", onMouseMove, true);
-    document.removeEventListener("click", onClick, true);
-
-    // Clear pick highlights and hover
-    setHovered(null);
-    firstPick.classList.remove(CONTAINER_CLASS);
-    firstPick = null;
-    target.classList.remove(HOVER_CLASS);
-
-    // Highlight resolved container
-    articleRoot.classList.add(CONTAINER_CLASS);
-    let selectedContainer = articleRoot;
-
-    switchHudToConfirmation(
-      hud,
-      () => {
-        cleanup();
-        // Confirmed — cleanup removes container highlight, then apply
-        void Promise.resolve(onComplete(selectedContainer)).catch((error) => {
-          console.error("Error applying custom article selection:", error);
-        });
-      },
-      () => cleanup(),
+    const hud = showHud(
+      "Click the first paragraph of the article. Press Esc to cancel.",
     );
-  };
+    let hovered: HTMLElement | null = null;
+    let firstPick: HTMLElement | null = null;
+    let articleRoot: HTMLElement | null = null;
 
-  const onKeyDown = (event: KeyboardEvent): void => {
-    if (event.key !== "Escape") return;
-    event.preventDefault();
-    cleanup();
-  };
+    const setHovered = (next: HTMLElement | null): void => {
+      if (hovered === next) return;
 
-  const cleanup = (): void => {
-    document.removeEventListener("mousemove", onMouseMove, true);
-    document.removeEventListener("click", onClick, true);
-    window.removeEventListener("keydown", onKeyDown, true);
+      if (hovered && hovered !== firstPick) {
+        hovered.classList.remove(HOVER_CLASS);
+      }
 
-    if (hovered) {
-      hovered.classList.remove(HOVER_CLASS);
-      hovered = null;
-    }
+      hovered = next;
 
-    if (firstPick) {
+      if (hovered && hovered !== firstPick) {
+        hovered.classList.add(HOVER_CLASS);
+      }
+    };
+
+    const onMouseMove = (event: MouseEvent): void => {
+      setHovered(getReadableTargetFromEventTarget(event.target));
+    };
+
+    const onClick = (event: MouseEvent): void => {
+      const hudEl = document.getElementById(SELECTION_HUD_ID);
+      const cancelBtn = hudEl?.querySelector(".rt-sel-cancel");
+      if (
+        cancelBtn &&
+        (event.target === cancelBtn || cancelBtn.contains(event.target as Node))
+      ) {
+        event.stopImmediatePropagation();
+        cleanup();
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      const target = getReadableTargetFromEventTarget(event.target);
+      if (!target) {
+        return;
+      }
+
+      if (!firstPick) {
+        firstPick = target;
+        firstPick.classList.remove(HOVER_CLASS);
+        firstPick.classList.add(CONTAINER_CLASS);
+        updateHud(
+          hud,
+          "Now click the last paragraph of the article. Press Esc to cancel.",
+        );
+        return;
+      }
+
+      // Second pick — resolve container and enter confirmation phase
+      articleRoot = findNearestCommonAncestor(firstPick, target);
+
+      // Stop selection interaction (keydown stays active for Esc-to-cancel)
+      document.removeEventListener("mousemove", onMouseMove, true);
+      document.removeEventListener("click", onClick, true);
+
+      // Clear pick highlights and hover
+      setHovered(null);
       firstPick.classList.remove(CONTAINER_CLASS);
       firstPick = null;
-    }
+      target.classList.remove(HOVER_CLASS);
 
-    if (articleRoot) {
-      articleRoot.classList.remove(CONTAINER_CLASS);
-      articleRoot = null;
-    }
+      // Highlight resolved container
+      articleRoot.classList.add(CONTAINER_CLASS);
+      let selectedContainer = articleRoot;
 
-    removeHud();
-    removeSelectionStyles();
-    activeCleanup = null;
-  };
+      switchHudToConfirmation(
+        hud,
+        () => {
+          cleanup();
+          // Confirmed — cleanup removes container highlight, then apply
+          resolve(selectedContainer);
+        },
+        () => cleanup(),
+      );
+    };
 
-  document.addEventListener("mousemove", onMouseMove, true);
-  document.addEventListener("click", onClick, true);
-  window.addEventListener("keydown", onKeyDown, true);
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      cleanup();
+    };
 
-  activeCleanup = cleanup;
+    const cleanup = (): void => {
+      document.removeEventListener("mousemove", onMouseMove, true);
+      document.removeEventListener("click", onClick, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+
+      if (hovered) {
+        hovered.classList.remove(HOVER_CLASS);
+        hovered = null;
+      }
+
+      if (firstPick) {
+        firstPick.classList.remove(CONTAINER_CLASS);
+        firstPick = null;
+      }
+
+      if (articleRoot) {
+        articleRoot.classList.remove(CONTAINER_CLASS);
+        articleRoot = null;
+      }
+
+      removeHud();
+      removeSelectionStyles();
+      activeCleanup = null;
+    };
+
+    document.addEventListener("mousemove", onMouseMove, true);
+    document.addEventListener("click", onClick, true);
+    window.addEventListener("keydown", onKeyDown, true);
+
+    activeCleanup = cleanup;
+  });
 }
