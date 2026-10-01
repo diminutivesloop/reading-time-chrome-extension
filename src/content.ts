@@ -19,16 +19,24 @@ let lastAppliedReadingTitle: string | null = null;
 
 let customArticleElement: HTMLElement | null = null;
 
+function getLoneElementBySelector(
+  selector: string,
+  parent?: HTMLElement,
+): HTMLElement | null {
+  const elements = (parent || document).querySelectorAll<HTMLElement>(selector);
+  return elements.length === 1 ? elements[0] : null;
+}
+
 /**
  * Get the element used for text extraction
  */
 export function getArticleElement(): HTMLElement {
-  let mainElement = document.querySelector<HTMLElement>("main");
+  let mainElement = getLoneElementBySelector("main");
   if (!mainElement) {
-    mainElement = document.querySelector<HTMLElement>('[role="main"]');
+    mainElement = getLoneElementBySelector('[role="main"]');
   }
   const nativeArticleElement =
-    mainElement?.querySelector<HTMLElement>("article");
+    mainElement && getLoneElementBySelector("article", mainElement);
   return (
     customArticleElement || nativeArticleElement || mainElement || document.body
   );
