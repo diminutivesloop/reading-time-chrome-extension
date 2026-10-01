@@ -7,7 +7,6 @@
 const SELECTION_STYLE_ID = "reading-time-article-selection-style";
 const SELECTION_HUD_ID = "reading-time-article-selection-hud";
 const HOVER_CLASS = "reading-time-article-selection-hover";
-const FIRST_PICK_CLASS = "reading-time-article-selection-first";
 const CONTAINER_CLASS = "reading-time-article-selection-container";
 
 type SelectionCompleteHandler = (
@@ -98,16 +97,10 @@ function ensureSelectionStyles(): void {
       cursor: crosshair !important;
     }
 
-    .${FIRST_PICK_CLASS} {
+    .${CONTAINER_CLASS} {
       outline: 3px solid #22c55e !important;
       outline-offset: 2px !important;
       background: rgba(34, 197, 94, 0.1) !important;
-    }
-
-    .${CONTAINER_CLASS} {
-      outline: 3px dashed #818cf8 !important;
-      outline-offset: 4px !important;
-      background: rgba(129, 140, 248, 0.07) !important;
     }
 
     #${SELECTION_HUD_ID} .rt-sel-confirm {
@@ -283,6 +276,7 @@ export function startCustomArticleSelection(
   );
   let hovered: HTMLElement | null = null;
   let firstPick: HTMLElement | null = null;
+  let articleRoot: HTMLElement | null = null;
 
   const setHovered = (next: HTMLElement | null): void => {
     if (hovered === next) return;
@@ -326,7 +320,7 @@ export function startCustomArticleSelection(
     if (!firstPick) {
       firstPick = target;
       firstPick.classList.remove(HOVER_CLASS);
-      firstPick.classList.add(FIRST_PICK_CLASS);
+      firstPick.classList.add(CONTAINER_CLASS);
       updateHud(
         hud,
         "Now click the last paragraph of the article. Press Esc to cancel.",
@@ -335,7 +329,7 @@ export function startCustomArticleSelection(
     }
 
     // Second pick — resolve container and enter confirmation phase
-    const articleRoot = findNearestCommonAncestor(firstPick, target);
+    articleRoot = findNearestCommonAncestor(firstPick, target);
 
     // Stop selection interaction (keydown stays active for Esc-to-cancel)
     document.removeEventListener("mousemove", onMouseMove, true);
@@ -343,19 +337,20 @@ export function startCustomArticleSelection(
 
     // Clear pick highlights and hover
     setHovered(null);
-    firstPick.classList.remove(FIRST_PICK_CLASS);
+    firstPick.classList.remove(CONTAINER_CLASS);
     firstPick = null;
     target.classList.remove(HOVER_CLASS);
 
     // Highlight resolved container
     articleRoot.classList.add(CONTAINER_CLASS);
+    let selectedContainer = articleRoot;
 
     switchHudToConfirmation(
       hud,
       () => {
-        // Confirmed — cleanup removes container highlight, then apply
         cleanup();
-        void Promise.resolve(onComplete(articleRoot)).catch((error) => {
+        // Confirmed — cleanup removes container highlight, then apply
+        void Promise.resolve(onComplete(selectedContainer)).catch((error) => {
           console.error("Error applying custom article selection:", error);
         });
       },
@@ -380,8 +375,13 @@ export function startCustomArticleSelection(
     }
 
     if (firstPick) {
-      firstPick.classList.remove(FIRST_PICK_CLASS);
+      firstPick.classList.remove(CONTAINER_CLASS);
       firstPick = null;
+    }
+
+    if (articleRoot) {
+      articleRoot.classList.remove(CONTAINER_CLASS);
+      articleRoot = null;
     }
 
     removeHud();
