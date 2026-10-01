@@ -7,7 +7,8 @@ export type MessageAction =
   | "getPageStats"
   | "toggleDebug"
   | "getDebugState"
-  | "startReadingTest";
+  | "startReadingTest"
+  | "startCustomArticleSelection";
 
 /**
  * Message requests sent to the content script
@@ -30,11 +31,16 @@ export interface StartReadingTestMessage {
   action: "startReadingTest";
 }
 
+export interface StartCustomArticleSelectionMessage {
+  action: "startCustomArticleSelection";
+}
+
 export type MessageRequest =
   | GetPageStatsMessage
   | ToggleDebugMessage
   | GetDebugStateMessage
-  | StartReadingTestMessage;
+  | StartReadingTestMessage
+  | StartCustomArticleSelectionMessage;
 
 /**
  * Message responses sent back from the content script

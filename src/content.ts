@@ -5,18 +5,47 @@
 
 import type { MessageRequest, MessageResponse } from "./messages";
 import type { PageStats } from "./page-stats";
-import { countWords, getPageText } from "./shared";
+import { countWords } from "./shared";
 import { isDebugActive, enableDebugMode, disableDebugMode } from "./debug";
 import { startReadingTest, cancelReadingTest } from "./speed-test";
+import { getWordsPerMinute } from "./wpm-storage";
+import {
+  startCustomArticleSelection,
+  cancelCustomArticleSelection,
+} from "./article-selection";
 
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
+
+let customArticleElement: HTMLElement | null = null;
+
+/**
+ * Get the element used for text extraction
+ */
+export function getArticleElement(): HTMLElement {
+  let mainElement = document.querySelector<HTMLElement>("main");
+  if (!mainElement) {
+    mainElement = document.querySelector<HTMLElement>('[role="main"]');
+  }
+  const nativeArticleElement =
+    mainElement?.querySelector<HTMLElement>("article");
+  return (
+    customArticleElement || nativeArticleElement || mainElement || document.body
+  );
+}
+
+/**
+ * Extract text content from the page
+ */
+export function getArticleText(): string {
+  return getArticleElement().innerText;
+}
 
 /**
  * Calculate reading statistics
  */
 function calculatePageStats(wordsPerMinute?: number): PageStats {
-  const pageText = getPageText();
+  const pageText = getArticleText();
 
   const stats: PageStats = {
     wordCount: countWords(pageText),
@@ -45,8 +74,30 @@ function appendReadingTimeToTitle(minutes: number): void {
   lastAppliedReadingTitle = updatedTitle;
 }
 
+/**
+ * Apply a selected article container and refresh reading-time title estimate.
+ */
+async function applyCustomArticleSelection(element: HTMLElement) {
+  customArticleElement = element;
+
+  // Update debug mode to reflect new text element if active
+  if (isDebugActive()) {
+    disableDebugMode();
+    enableDebugMode();
+  }
+
+  const wordsPerMinute = await getWordsPerMinute();
+  const stats = calculatePageStats(wordsPerMinute);
+  if (stats.readingMinutes) {
+    appendReadingTimeToTitle(stats.readingMinutes);
+  }
+}
+
 // Clean up if the page is being unloaded
-window.addEventListener("pagehide", cancelReadingTest);
+window.addEventListener("pagehide", () => {
+  cancelReadingTest();
+  cancelCustomArticleSelection();
+});
 
 /**
  * Listen for messages from the popup
@@ -59,7 +110,7 @@ chrome.runtime.onMessage.addListener(
   ) => {
     if (request.action === "getPageStats") {
       const stats = calculatePageStats(request.wordsPerMinute);
-      if (typeof stats.readingMinutes === "number") {
+      if (stats.readingMinutes) {
         appendReadingTimeToTitle(stats.readingMinutes);
       }
       sendResponse({ action: "getPageStats", stats });
@@ -75,10 +126,13 @@ chrome.runtime.onMessage.addListener(
     } else if (request.action === "startReadingTest") {
       startReadingTest((wpm) => {
         const stats = calculatePageStats(wpm);
-        if (typeof stats.readingMinutes === "number") {
+        if (stats.readingMinutes) {
           appendReadingTimeToTitle(stats.readingMinutes);
         }
       });
+      sendResponse();
+    } else if (request.action === "startCustomArticleSelection") {
+      startCustomArticleSelection(applyCustomArticleSelection);
       sendResponse();
     }
   },

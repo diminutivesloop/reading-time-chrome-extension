@@ -3,12 +3,12 @@
  * Provides a floating timer bar to measure and save reading speed
  */
 
+import { getArticleText } from "./content";
 import {
   MIN_WORDS_PER_MINUTE,
   MAX_WORDS_PER_MINUTE,
   countWords,
   isValidWordsPerMinute,
-  getPageText,
 } from "./shared";
 import { setWordsPerMinute } from "./wpm-storage";
 
@@ -206,7 +206,7 @@ function finishReadingTest(): void {
     1,
     Math.floor((Date.now() - testStartTime) / 1000),
   );
-  const wordCount = countWords(getPageText());
+  const wordCount = countWords(getArticleText());
   const elapsedMinutes = elapsedSeconds / 60;
   const measuredWpm = Math.max(1, Math.round(wordCount / elapsedMinutes));
 

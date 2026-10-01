@@ -11,6 +11,7 @@ reading-time-chrome-extension/
 ├── tsconfig.json           # TypeScript configuration
 ├── src/
 │   ├── content.ts          # Content script: message routing, stats, title management
+│   ├── article-selection.ts # Custom article range selection flow
 │   ├── debug.ts            # Debug mode feature module
 │   ├── messages.ts         # Message request/response types
 │   ├── page-stats.ts       # Shared page statistics types
@@ -41,6 +42,11 @@ Note: After reloading the extension the popup may not work until you refresh the
 3. The popup will display:
    - **Word Count**: Total number of words on the page
    - **Reading Time**: Estimated time to read (in minutes)
+4. To customize what text is treated as article text:
+   - Click **Select Article Range** in the popup
+   - Click the first paragraph of the article on the page
+   - Click the last paragraph of the article on the page
+   - The extension uses the nearest common ancestor of those selections as the article container
 
 ## Configuration
 
@@ -56,7 +62,8 @@ Default: 200 words per minute
 - [ ] Reading time indicator on page
 - [x] Show reading time in tab titles
 - [x] Measure actual reading speed
-- [ ] Custom selection of reading text
+- [x] Custom selection of reading text
+- [ ] Persistent article selection per page/site
 - [x] Debug mode that shows what text is analyzed and where the word boundaries are
 
 ## Known Issues

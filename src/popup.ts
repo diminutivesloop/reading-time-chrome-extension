@@ -6,6 +6,7 @@ import {
   GetDebugStateMessage,
   GetDebugStateResponse,
   GetPageStatsMessage,
+  StartCustomArticleSelectionMessage,
   StartReadingTestMessage,
   ToggleDebugMessage,
   type GetPageStatsResponse,
@@ -23,6 +24,9 @@ import {
 } from "./wpm-storage";
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
+const customArticleSelectionBtn = document.getElementById(
+  "customArticleSelectionBtn",
+) as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
@@ -53,6 +57,13 @@ if (debugModeEl) {
 
 if (startSpeedTestBtn) {
   startSpeedTestBtn.addEventListener("click", startReadingSpeedTest);
+}
+
+if (customArticleSelectionBtn) {
+  customArticleSelectionBtn.addEventListener(
+    "click",
+    startCustomArticleSelection,
+  );
 }
 
 if (wpmInput) {
@@ -237,6 +248,43 @@ async function startReadingSpeedTest(): Promise<void> {
   } catch (error) {
     console.error("Error starting reading test:", error);
     showError("Error starting reading test");
+  }
+}
+
+/**
+ * Start custom article selection on the active tab.
+ * The popup closes so the user can click on the page.
+ */
+async function startCustomArticleSelection(): Promise<void> {
+  clearError();
+
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tab.id) {
+      chrome.tabs.sendMessage<StartCustomArticleSelectionMessage>(
+        tab.id,
+        { action: "startCustomArticleSelection" },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              "Error starting custom article selection:",
+              chrome.runtime.lastError,
+            );
+            showError("Error starting custom article selection");
+            return;
+          }
+
+          window.close();
+        },
+      );
+    }
+  } catch (error) {
+    console.error("Error starting custom article selection:", error);
+    showError("Error starting custom article selection");
   }
 }
 

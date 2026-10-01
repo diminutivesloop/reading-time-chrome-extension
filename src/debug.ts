@@ -3,7 +3,7 @@
  * Provides visual debugging tools for inspecting the text extraction area and word boundaries
  */
 
-import { getTextElement } from "./shared";
+import { getArticleElement } from "./content";
 
 const DEBUG_OUTLINE_OVERLAY_CLASS = "reading-time-debug-outline-overlay";
 const DEBUG_LABEL_CLASS = "reading-time-debug-label";
@@ -107,7 +107,7 @@ export function enableDebugMode(): void {
   disableDebugMode();
   ensureDebugStyles();
 
-  const el = getTextElement() as HTMLElement;
+  const el = getArticleElement();
 
   // Inject an absolutely positioned outline overlay
   const outlineOverlay = createOutlineOverlay(el);
