@@ -46,8 +46,8 @@ Note: After reloading the extension the popup may not work until you refresh the
 1. Navigate to any web page
 2. Click the Reading Time extension icon
 3. The popup will display:
-   - **Word Count**: Total number of words on the page
    - **Reading Time**: Estimated time to read (in minutes)
+   - **Word Count**: Total number of words on the page
 4. To customize what text is treated as article text:
    - Click **Select Article Range** in the popup
    - Click the first paragraph of the article on the page
@@ -56,11 +56,7 @@ Note: After reloading the extension the popup may not work until you refresh the
 
 ## Configuration
 
-To adjust the reading speed calculation, modify the `DEFAULT_WORDS_PER_MINUTE` constant in:
-
-- `src/wpm-storage.ts`
-
-Default: 200 words per minute
+Words per minute can be customized in the popup. Click the reset button to revert to the default of 200. You can also use the Measure Reading Speed button to manually measure your reading speed and then save the updated value.
 
 ## Future Enhancements
 
@@ -74,7 +70,6 @@ Default: 200 words per minute
 
 ## Known Issues
 
-- Debug overlay may not position correctly on pages w/ dynamic content
 - Debug overlay word count is higher than popup count
 
 🤖 Built w/ help from AI
