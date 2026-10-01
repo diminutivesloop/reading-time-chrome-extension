@@ -35,14 +35,16 @@ function ensureDebugStyles(): void {
       box-sizing: border-box;
     }
     .${DEBUG_LABEL_CLASS} {
-      position: absolute;
+      position: sticky;
+      top: 0;
+      display: inline-block;
       background: #667eea;
       color: white;
       font-size: 11px;
       padding: 2px 8px;
       border-radius: 3px;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      white-space: nowrap;
+      pointer-events: auto;
     }
     .${DEBUG_WORD_CLASS} {
       background: rgba(102, 126, 234, 0.15);
@@ -94,8 +96,8 @@ function positionOutlineOverlay(
   target: HTMLElement,
 ): void {
   const rect = target.getBoundingClientRect();
-  overlay.style.top = `${rect.top}px`;
-  overlay.style.left = `${rect.left}px`;
+  overlay.style.top = `${rect.top + window.scrollY}px`;
+  overlay.style.left = `${rect.left + window.scrollX}px`;
   overlay.style.width = `${rect.width}px`;
   overlay.style.height = `${rect.height}px`;
 }
@@ -114,7 +116,7 @@ export function enableDebugMode(): void {
 
   // Keep overlay in sync on scroll / resize
   debugScrollHandler = () => positionOutlineOverlay(outlineOverlay, el);
-  // window.addEventListener("scroll", debugScrollHandler, { passive: true });
+  window.addEventListener("scroll", debugScrollHandler, { passive: true });
   window.addEventListener("resize", debugScrollHandler, { passive: true });
 
   // Walk text nodes inside the element and wrap each word in a span
