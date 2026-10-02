@@ -6,9 +6,7 @@
       "type": "typescript",
       "tsconfig": "tsconfig.json",
       "option": "watch",
-      "problemMatcher": [
-        "$tsc-watch"
-      ],
+      "problemMatcher": ["$tsc-watch"],
       "group": "build",
       "runOptions": {
         "runOn": "folderOpen"
@@ -16,8 +14,8 @@
     },
     {
       "label": "esbuild: watch",
-      "type": "npm",
-      "script": "watch",
+      "type": "shell",
+      "command": "npm run watch",
       "problemMatcher": [],
       "group": "build",
       "isBackground": true,
