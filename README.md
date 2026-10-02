@@ -36,34 +36,6 @@ Note: After reloading the extension the popup may not work until you refresh the
 
 Words per minute can be customized in the popup. Click the reset button to revert to the default of 200. You can also use the Measure Reading Speed button to manually measure your reading speed and then save the updated value.
 
-## Project Structure
-
-```
-reading-time-chrome-extension/
-├── manifest.json           # Extension configuration
-├── esbuild.mjs             # Build script
-├── vitest.config.mts       # Unit test configuration
-├── tsconfig.json           # TypeScript configuration
-├── src/
-│   ├── content.ts          # Content script: message routing, stats, title management
-│   ├── article-selection.ts # Custom article range selection flow
-│   ├── debug.ts            # Debug mode feature module
-│   ├── messages.ts         # Message request/response types
-│   ├── page-stats.ts       # Shared page statistics types
-│   ├── speed-test.ts       # Reading speed test feature module
-│   ├── shared.ts            # Shared utilities and constants
-│   ├── wpm-storage.ts      # Reading-speed storage helpers
-│   ├── popup.html          # Popup UI
-│   ├── popup.css           # Popup styling
-│   └── popup.ts            # Popup logic
-├── tests/
-│   ├── setup.ts             # Shared Vitest Chrome API stubs
-│   ├── shared.test.ts       # Shared utility tests
-│   ├── content.test.ts      # Content extraction and statistics tests
-│   └── article-selection.test.ts # Article selection workflow tests
-└── README.md               # Documentation
-```
-
 ## Future Enhancements
 
 - [x] Customizable reading speed
