@@ -1,6 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MessageRequest, MessageResponse } from "../src/messages";
-import { calculatePageStats, getArticleElement } from "../src/content";
+import {
+  applyCustomArticleSelection,
+  calculatePageStats,
+  getArticleElement,
+} from "../src/content";
 import { chromeMessageListeners } from "./setup";
 
 type MessageListener = (
@@ -24,6 +28,10 @@ function requestPageStats(wordsPerMinute: number): void {
     {},
     () => undefined,
   );
+}
+
+async function flushPromises(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 beforeEach(() => {
@@ -118,5 +126,84 @@ describe("appendReadingTimeToTitle", () => {
     requestPageStats(2);
 
     expect(document.title).toBe("[<1m] Page updated its title");
+  });
+});
+
+describe("applyCustomArticleSelection", () => {
+  it("persists a selector for the provided element", async () => {
+    const article = document.createElement("article");
+    article.className = "story-body";
+    document.body.appendChild(article);
+
+    await applyCustomArticleSelection(article);
+
+    expect(chrome.storage.local.set).toHaveBeenCalledWith({
+      [`articleSelector:${location.hostname}`]: "article.story-body",
+    });
+  });
+
+  it("falls back to ancestor elements if unable to generate unique selector for element", async () => {
+    const article = document.createElement("article");
+    article.className = "story-body";
+    const element1 = article.appendChild(document.createElement("div"));
+    element1.className = "content";
+    const element2 = article.appendChild(document.createElement("div"));
+    element2.className = "content";
+    document.body.appendChild(article);
+
+    await applyCustomArticleSelection(element1);
+
+    expect(chrome.storage.local.set).toHaveBeenCalledWith({
+      [`articleSelector:${location.hostname}`]: "article.story-body",
+    });
+  });
+});
+
+describe("applyPersistedArticleSelector", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it("uses a saved selector that resolves to exactly one element", async () => {
+    const postBody = document.createElement("div");
+    postBody.className = "post-body";
+    setInnerText(postBody, "Saved selector content.");
+    document.body.appendChild(postBody);
+
+    vi.mocked(chrome.storage.local.get).mockImplementation((keys) => {
+      if (Array.isArray(keys)) {
+        const key = keys[0];
+        if (key === `articleSelector:${location.hostname}`) {
+          return Promise.resolve({ [key]: "div.post-body" });
+        }
+      }
+      return Promise.resolve({});
+    });
+
+    const content = await import("../src/content");
+    await flushPromises();
+
+    expect(content.getArticleElement()).toBe(postBody);
+  });
+
+  it("falls back to native detection when the saved selector no longer matches", async () => {
+    const main = document.createElement("main");
+    setInnerText(main, "Fallback content.");
+    document.body.appendChild(main);
+
+    vi.mocked(chrome.storage.local.get).mockImplementation((keys) => {
+      if (Array.isArray(keys)) {
+        const key = keys[0];
+        if (key === `articleSelector:${location.hostname}`) {
+          return Promise.resolve({ [key]: "div.no-longer-there" });
+        }
+      }
+      return Promise.resolve({});
+    });
+
+    const content = await import("../src/content");
+    await flushPromises();
+
+    expect(content.getArticleElement()).toBe(main);
   });
 });

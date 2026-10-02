@@ -264,6 +264,44 @@ export function cancelCustomArticleSelection(): void {
   activeCleanup();
 }
 
+/**
+ * Build a CSS selector from an element's tag and classes (no structural/ancestor path)
+ */
+export function buildSelectorForElement(el: HTMLElement): string {
+  if (el.id && document.getElementById(el.id) === el) {
+    return `#${CSS.escape(el.id)}`;
+  }
+
+  const tag = el.tagName.toLowerCase();
+  const classes = Array.from(el.classList).filter((c) => c.trim().length > 0);
+  if (classes.length === 0) {
+    return tag;
+  }
+
+  return `${tag}${classes.map((c) => `.${CSS.escape(c)}`).join("")}`;
+}
+
+/**
+ * Walk up from el until its selector resolves to exactly that one element
+ * (a tag+classes selector can otherwise match several elements on the page).
+ * Returns null if no element up to <body> has a unique selector.
+ */
+export function resolveUniqueSelector(el: HTMLElement): {
+  element: HTMLElement;
+  selector: string;
+} | null {
+  let current: HTMLElement | null = el;
+  while (current && current !== document.body) {
+    const selector = buildSelectorForElement(current);
+    if (document.querySelectorAll(selector).length === 1) {
+      return { element: current, selector };
+    }
+    current = current.parentElement;
+  }
+
+  return null;
+}
+
 export function startCustomArticleSelection(): Promise<HTMLElement> {
   return new Promise<HTMLElement>((resolve) => {
     cancelCustomArticleSelection();

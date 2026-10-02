@@ -12,12 +12,18 @@ import { getWordsPerMinute } from "./wpm-storage";
 import {
   startCustomArticleSelection,
   cancelCustomArticleSelection,
+  resolveUniqueSelector,
 } from "./article-selection";
+import {
+  getArticleSelector,
+  setArticleSelector,
+} from "./article-selector-storage";
 
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
 
 let customArticleElement: HTMLElement | null = null;
+let persistedArticleElement: HTMLElement | null = null;
 
 function getLoneElementBySelector(
   selector: string,
@@ -38,7 +44,11 @@ export function getArticleElement(): HTMLElement {
   const nativeArticleElement =
     mainElement && getLoneElementBySelector("article", mainElement);
   return (
-    customArticleElement || nativeArticleElement || mainElement || document.body
+    customArticleElement ||
+    persistedArticleElement ||
+    nativeArticleElement ||
+    mainElement ||
+    document.body
   );
 }
 
@@ -46,7 +56,7 @@ export function getArticleElement(): HTMLElement {
  * Extract text content from the page
  */
 export function getArticleText(): string {
-  return getArticleElement().innerText;
+  return getArticleElement().innerText ?? "";
 }
 
 /**
@@ -83,10 +93,31 @@ function appendReadingTimeToTitle(minutes: number): void {
 }
 
 /**
+ * Calculate stats and, when an estimate is available, show it in the title
+ */
+function updateTitleWithStats(wordsPerMinute: number): PageStats {
+  const stats = calculatePageStats(wordsPerMinute);
+  if (stats.readingMinutes) {
+    appendReadingTimeToTitle(stats.readingMinutes);
+  }
+  return stats;
+}
+
+/**
  * Apply a selected article container and refresh reading-time title estimate.
  */
-async function applyCustomArticleSelection(element: HTMLElement) {
-  customArticleElement = element;
+export async function applyCustomArticleSelection(element: HTMLElement) {
+  // A tag+classes selector can match several elements, so climb to the
+  // nearest ancestor (possibly the element itself) with a unique selector.
+  const resolved = resolveUniqueSelector(element);
+  if (!resolved) {
+    console.debug(
+      "[Reading Time] No unique selector found for selected element or its ancestors",
+    );
+    return;
+  }
+  const { element: resolvedElement, selector } = resolved;
+  customArticleElement = resolvedElement;
 
   // Update debug mode to reflect new text element if active
   if (isDebugActive()) {
@@ -94,12 +125,70 @@ async function applyCustomArticleSelection(element: HTMLElement) {
     enableDebugMode();
   }
 
-  const wordsPerMinute = await getWordsPerMinute();
-  const stats = calculatePageStats(wordsPerMinute);
-  if (stats.readingMinutes) {
-    appendReadingTimeToTitle(stats.readingMinutes);
-  }
+  updateTitleWithStats(await getWordsPerMinute());
+
+  setArticleSelector(location.hostname, selector)
+    .then(() =>
+      console.debug(
+        "[Reading Time] Persisted article selector for",
+        location.hostname,
+        ":",
+        selector,
+      ),
+    )
+    .catch((error) => console.error("Error saving article selector:", error));
 }
+
+/**
+ * Look up a saved article selector for this site and apply it if it resolves
+ * to exactly one element, so the picked container survives page reloads.
+ */
+async function applyPersistedArticleSelector(): Promise<void> {
+  const selector = await getArticleSelector(location.hostname);
+  if (!selector) {
+    console.debug(
+      "[Reading Time] No persisted article selector found for",
+      location.hostname,
+    );
+    return;
+  }
+
+  console.debug(
+    "[Reading Time] Loaded article selector for",
+    location.hostname,
+    ":",
+    selector,
+  );
+
+  let element: HTMLElement | null = null;
+  try {
+    element = getLoneElementBySelector(selector);
+  } catch (error) {
+    console.error("Error applying saved article selector:", error);
+    return;
+  }
+  if (!element) {
+    console.debug(
+      "[Reading Time] Saved article selector did not match exactly one element:",
+      selector,
+    );
+    return;
+  }
+
+  console.debug("[Reading Time] Saved article selector matched:", selector);
+  persistedArticleElement = element;
+
+  if (isDebugActive()) {
+    disableDebugMode();
+    enableDebugMode();
+  }
+
+  updateTitleWithStats(await getWordsPerMinute());
+}
+
+applyPersistedArticleSelector().catch((error) =>
+  console.error("Error applying saved article selector:", error),
+);
 
 // Clean up if the page is being unloaded
 window.addEventListener("pagehide", () => {
@@ -117,10 +206,7 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response?: MessageResponse) => void,
   ) => {
     if (request.action === "getPageStats") {
-      const stats = calculatePageStats(request.wordsPerMinute);
-      if (stats.readingMinutes) {
-        appendReadingTimeToTitle(stats.readingMinutes);
-      }
+      const stats = updateTitleWithStats(request.wordsPerMinute);
       sendResponse({ action: "getPageStats", stats });
     } else if (request.action === "toggleDebug") {
       if (request.enabled) {
@@ -132,12 +218,7 @@ chrome.runtime.onMessage.addListener(
     } else if (request.action === "getDebugState") {
       sendResponse({ action: "getDebugState", debugActive: isDebugActive() });
     } else if (request.action === "startReadingTest") {
-      startReadingTest((wpm) => {
-        const stats = calculatePageStats(wpm);
-        if (stats.readingMinutes) {
-          appendReadingTimeToTitle(stats.readingMinutes);
-        }
-      });
+      startReadingTest(updateTitleWithStats);
       sendResponse();
     } else if (request.action === "startCustomArticleSelection") {
       applyCustomArticleSelection(await startCustomArticleSelection());

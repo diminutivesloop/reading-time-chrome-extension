@@ -14,7 +14,11 @@ vi.stubGlobal("chrome", {
   },
   storage: {
     sync: {
-      get: vi.fn(),
+      get: vi.fn((defaults) => Promise.resolve(defaults)),
+      set: vi.fn(),
+    },
+    local: {
+      get: vi.fn((defaults) => Promise.resolve(defaults)),
       set: vi.fn(),
     },
   },

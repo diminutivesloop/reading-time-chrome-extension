@@ -6,6 +6,8 @@ import {
   HUD_CONFIRM_CLASS,
   SELECTION_HUD_ID,
   SELECTION_STYLE_ID,
+  buildSelectorForElement,
+  resolveUniqueSelector,
   startCustomArticleSelection,
 } from "../src/article-selection";
 
@@ -137,5 +139,77 @@ describe("custom article selection", () => {
 
     expect(paragraph.classList.contains(HOVER_CLASS)).toBe(false);
     expect(document.getElementById(SELECTION_HUD_ID)).toBe(null);
+  });
+});
+
+describe("buildSelectorForElement", () => {
+  it("prefers a unique id over tag and classes", () => {
+    const el = document.createElement("div");
+    el.id = "main-article";
+    el.className = "content body";
+    document.body.appendChild(el);
+
+    expect(buildSelectorForElement(el)).toBe("#main-article");
+  });
+
+  it("builds a tag-plus-classes selector when there is no id", () => {
+    const el = document.createElement("article");
+    el.className = "post-content story-body";
+    document.body.appendChild(el);
+
+    expect(buildSelectorForElement(el)).toBe("article.post-content.story-body");
+  });
+
+  it("falls back to the bare tag name when there are no classes", () => {
+    const el = document.createElement("article");
+    document.body.appendChild(el);
+
+    expect(buildSelectorForElement(el)).toBe("article");
+  });
+
+  it("escapes class names that need it", () => {
+    const el = document.createElement("div");
+    el.classList.add("col-6/12");
+    document.body.appendChild(el);
+
+    expect(buildSelectorForElement(el)).toBe(`div.${CSS.escape("col-6/12")}`);
+  });
+});
+
+describe("resolveUniqueSelector", () => {
+  it("returns the element itself when its selector is already unique", () => {
+    const el = document.createElement("article");
+    el.className = "story";
+    document.body.appendChild(el);
+
+    expect(resolveUniqueSelector(el)).toEqual({
+      element: el,
+      selector: "article.story",
+    });
+  });
+
+  it("walks up to the nearest ancestor with a unique selector", () => {
+    const article = document.createElement("article");
+    article.className = "story";
+    const first = document.createElement("div");
+    first.className = "content";
+    const second = document.createElement("div");
+    second.className = "content";
+    article.append(first, second);
+    document.body.appendChild(article);
+
+    expect(resolveUniqueSelector(first)).toEqual({
+      element: article,
+      selector: "article.story",
+    });
+  });
+
+  it("returns null when no element in the chain has a unique selector", () => {
+    const first = document.createElement("div");
+    document.body.appendChild(first);
+    const second = document.createElement("div");
+    document.body.appendChild(second);
+
+    expect(resolveUniqueSelector(first)).toBeNull();
   });
 });
