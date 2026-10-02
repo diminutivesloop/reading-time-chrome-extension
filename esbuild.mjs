@@ -1,5 +1,5 @@
 import esbuild from "esbuild";
-import { cp, rm } from "fs/promises";
+import { cp, rm, stat } from "fs/promises";
 import { watch } from "fs";
 
 const isWatch = process.argv.includes("--watch");
@@ -38,9 +38,22 @@ if (isWatch) {
   await ctx.watch();
 
   for (const { src, dest } of assetFiles) {
-    watch(src, async () => {
-      await cp(src, dest);
-      console.log(`Copied ${src} → ${dest}`);
+    let lastCopiedMtimeMs = (await stat(src)).mtimeMs;
+    let copyQueue = Promise.resolve();
+
+    watch(src, () => {
+      copyQueue = copyQueue.then(async () => {
+        try {
+          const { mtimeMs } = await stat(src);
+          if (mtimeMs === lastCopiedMtimeMs) return;
+
+          await cp(src, dest);
+          lastCopiedMtimeMs = mtimeMs;
+          console.log(`Copied ${src} → ${dest}`);
+        } catch (error) {
+          console.error(`Failed to copy ${src} → ${dest}`, error);
+        }
+      });
     });
   }
 
