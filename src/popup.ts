@@ -4,7 +4,11 @@
 
 import {
   GetDebugStateMessage,
+  GetCustomArticleStateMessage,
+  GetCustomArticleStateResponse,
   GetDebugStateResponse,
+  ResetCustomArticleMessage,
+  ResetCustomArticleResponse,
   GetPageStatsMessage,
   StartCustomArticleSelectionMessage,
   StartReadingTestMessage,
@@ -26,6 +30,9 @@ import {
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const customArticleSelectionBtn = document.getElementById(
   "customArticleSelectionBtn",
+) as HTMLButtonElement;
+const resetCustomArticleBtn = document.getElementById(
+  "resetCustomArticleBtn",
 ) as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
@@ -64,6 +71,10 @@ if (customArticleSelectionBtn) {
     "click",
     startCustomArticleSelection,
   );
+}
+
+if (resetCustomArticleBtn) {
+  resetCustomArticleBtn.addEventListener("click", resetCustomArticle);
 }
 
 if (wpmInput) {
@@ -289,6 +300,79 @@ async function startCustomArticleSelection(): Promise<void> {
 }
 
 /**
+ * Swap between the select and reset buttons based on custom article state
+ */
+function showCustomArticleActive(active: boolean): void {
+  if (customArticleSelectionBtn) customArticleSelectionBtn.hidden = active;
+  if (resetCustomArticleBtn) resetCustomArticleBtn.hidden = !active;
+}
+
+/**
+ * Clear the custom article range and saved selector, then refresh stats
+ */
+async function resetCustomArticle(): Promise<void> {
+  clearError();
+
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tab.id) {
+      chrome.tabs.sendMessage<
+        ResetCustomArticleMessage,
+        ResetCustomArticleResponse
+      >(tab.id, { action: "resetCustomArticle" }, (response) => {
+        if (chrome.runtime.lastError || !response?.success) {
+          console.error(
+            "Error resetting article range:",
+            chrome.runtime.lastError,
+          );
+          showError("Error resetting article range");
+          return;
+        }
+        showCustomArticleActive(false);
+        analyzeCurrentPage();
+      });
+    }
+  } catch (error) {
+    console.error("Error resetting article range:", error);
+    showError("Error resetting article range");
+  }
+}
+
+/**
+ * Check whether the page currently uses a custom article range
+ */
+async function loadCustomArticleState(): Promise<void> {
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+
+    if (tab.id) {
+      chrome.tabs.sendMessage<
+        GetCustomArticleStateMessage,
+        GetCustomArticleStateResponse
+      >(tab.id, { action: "getCustomArticleState" }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(
+            "Error loading article range state:",
+            chrome.runtime.lastError,
+          );
+          return;
+        }
+        showCustomArticleActive(response.active);
+      });
+    }
+  } catch (error) {
+    console.error("Error loading article range state:", error);
+  }
+}
+
+/**
  * Toggle debug mode on the active tab
  */
 async function toggleDebugMode(enabled: boolean): Promise<void> {
@@ -358,6 +442,7 @@ async function loadDebugSetting(): Promise<void> {
 // Load stats and settings when popup opens
 window.addEventListener("load", async () => {
   loadDebugSetting();
+  loadCustomArticleState();
   await loadWpmSetting();
   analyzeCurrentPage();
 });

@@ -20,6 +20,7 @@ vi.stubGlobal("chrome", {
     local: {
       get: vi.fn((defaults) => Promise.resolve(defaults)),
       set: vi.fn(),
+      remove: vi.fn(),
     },
   },
 });

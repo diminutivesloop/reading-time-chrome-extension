@@ -31,13 +31,14 @@
 
       <button id="analyzeBtn" class="btn btn-primary">Analyze Page</button>
 
-      <div id="error"></div>
-
       <button id="startSpeedTestBtn" class="btn btn-secondary">
         Measure Reading Speed
       </button>
       <button id="customArticleSelectionBtn" class="btn btn-secondary">
-        Select Article Range
+        Select Article Text
+      </button>
+      <button id="resetCustomArticleBtn" class="btn btn-secondary" hidden>
+        Reset Article Text
       </button>
 
       <div class="debug-section">
@@ -46,6 +47,8 @@
           <span>Debug mode</span>
         </label>
       </div>
+
+      <div id="error"></div>
     </div>
     <script src="popup.js"></script>
   </body>

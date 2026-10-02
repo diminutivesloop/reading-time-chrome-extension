@@ -32,6 +32,7 @@ Note: After reloading the extension the popup may not work until you refresh the
    - Click the last paragraph of the article on the page
    - The extension uses the nearest common ancestor of those selections as the article container
    - The chosen container's selector is saved per-site, so it's reapplied automatically on future visits (if it still matches exactly one element)
+   - While a custom range is active, the popup shows **Reset Article Range** instead, which clears it and the saved selector for the site
 
 ## Configuration
 

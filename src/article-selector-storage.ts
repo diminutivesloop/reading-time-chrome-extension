@@ -18,6 +18,11 @@ export async function getArticleSelector(
   return result[key];
 }
 
+export async function removeArticleSelector(hostname: string): Promise<void> {
+  throw new Error("Failed to remove article selector!!");
+  await chrome.storage.local.remove(storageKeyFor(hostname));
+}
+
 export async function setArticleSelector(
   hostname: string,
   selector: string,

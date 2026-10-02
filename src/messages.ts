@@ -1,16 +1,6 @@
 import type { PageStats } from "./page-stats";
 
 /**
- * Supported message actions exchanged with the content script
- */
-export type MessageAction =
-  | "getPageStats"
-  | "toggleDebug"
-  | "getDebugState"
-  | "startReadingTest"
-  | "startCustomArticleSelection";
-
-/**
  * Message requests sent to the content script
  */
 export interface GetPageStatsMessage {
@@ -35,12 +25,22 @@ export interface StartCustomArticleSelectionMessage {
   action: "startCustomArticleSelection";
 }
 
+export interface GetCustomArticleStateMessage {
+  action: "getCustomArticleState";
+}
+
+export interface ResetCustomArticleMessage {
+  action: "resetCustomArticle";
+}
+
 export type MessageRequest =
   | GetPageStatsMessage
   | ToggleDebugMessage
   | GetDebugStateMessage
   | StartReadingTestMessage
-  | StartCustomArticleSelectionMessage;
+  | StartCustomArticleSelectionMessage
+  | GetCustomArticleStateMessage
+  | ResetCustomArticleMessage;
 
 /**
  * Message responses sent back from the content script
@@ -55,4 +55,18 @@ export interface GetDebugStateResponse {
   debugActive: boolean;
 }
 
-export type MessageResponse = GetPageStatsResponse | GetDebugStateResponse;
+export interface GetCustomArticleStateResponse {
+  action: "getCustomArticleState";
+  active: boolean;
+}
+
+export interface ResetCustomArticleResponse {
+  action: "resetCustomArticle";
+  success: boolean;
+}
+
+export type MessageResponse =
+  | GetPageStatsResponse
+  | GetDebugStateResponse
+  | GetCustomArticleStateResponse
+  | ResetCustomArticleResponse;

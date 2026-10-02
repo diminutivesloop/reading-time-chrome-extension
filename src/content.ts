@@ -17,6 +17,7 @@ import {
 import {
   getArticleSelector,
   setArticleSelector,
+  removeArticleSelector,
 } from "./article-selector-storage";
 
 let originalPageTitle = document.title;
@@ -186,9 +187,28 @@ async function applyPersistedArticleSelector(): Promise<void> {
   updateTitleWithStats(await getWordsPerMinute());
 }
 
-applyPersistedArticleSelector().catch((error) =>
+const persistedSelectorLoaded = applyPersistedArticleSelector().catch((error) =>
   console.error("Error applying saved article selector:", error),
 );
+
+/**
+ * Clear any custom article element and the saved selector for this site.
+ */
+export async function resetCustomArticle(): Promise<void> {
+  await persistedSelectorLoaded;
+  // Remove the saved selector first so a failure leaves state unchanged.
+  await removeArticleSelector(location.hostname);
+
+  customArticleElement = null;
+  persistedArticleElement = null;
+
+  if (isDebugActive()) {
+    disableDebugMode();
+    enableDebugMode();
+  }
+
+  updateTitleWithStats(await getWordsPerMinute());
+}
 
 // Clean up if the page is being unloaded
 window.addEventListener("pagehide", () => {
@@ -223,6 +243,20 @@ chrome.runtime.onMessage.addListener(
     } else if (request.action === "startCustomArticleSelection") {
       applyCustomArticleSelection(await startCustomArticleSelection());
       sendResponse();
+    } else if (request.action === "getCustomArticleState") {
+      await persistedSelectorLoaded;
+      sendResponse({
+        action: "getCustomArticleState",
+        active: !!(customArticleElement || persistedArticleElement),
+      });
+    } else if (request.action === "resetCustomArticle") {
+      try {
+        await resetCustomArticle();
+        sendResponse({ action: "resetCustomArticle", success: true });
+      } catch (error) {
+        console.error("Error resetting custom article:", error);
+        sendResponse({ action: "resetCustomArticle", success: false });
+      }
     }
   },
 );

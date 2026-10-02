@@ -4,6 +4,7 @@ import {
   applyCustomArticleSelection,
   calculatePageStats,
   getArticleElement,
+  resetCustomArticle,
 } from "../src/content";
 import { chromeMessageListeners } from "./setup";
 
@@ -156,6 +157,44 @@ describe("applyCustomArticleSelection", () => {
     expect(chrome.storage.local.set).toHaveBeenCalledWith({
       [`articleSelector:${location.hostname}`]: "article.story-body",
     });
+  });
+});
+
+describe("resetCustomArticle", () => {
+  it("clears the custom element and removes the persisted selector", async () => {
+    const main = document.createElement("main");
+    const article = document.createElement("div");
+    article.className = "story-body";
+    main.appendChild(article);
+    document.body.appendChild(main);
+
+    await applyCustomArticleSelection(article);
+    expect(getArticleElement()).toBe(article);
+
+    await resetCustomArticle();
+
+    expect(getArticleElement()).toBe(main);
+    expect(chrome.storage.local.remove).toHaveBeenCalledWith(
+      `articleSelector:${location.hostname}`,
+    );
+  });
+});
+
+describe("resetCustomArticle failure", () => {
+  it("rejects and keeps the custom element when removal fails", async () => {
+    const main = document.createElement("main");
+    const article = document.createElement("div");
+    article.className = "story-body";
+    main.appendChild(article);
+    document.body.appendChild(main);
+    await applyCustomArticleSelection(article);
+
+    vi.mocked(chrome.storage.local.remove).mockRejectedValueOnce(
+      new Error("fail"),
+    );
+
+    await expect(resetCustomArticle()).rejects.toThrow("fail");
+    expect(getArticleElement()).toBe(article);
   });
 });
 
