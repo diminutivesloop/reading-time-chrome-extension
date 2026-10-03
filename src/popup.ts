@@ -44,6 +44,8 @@ const startSpeedTestBtn = document.getElementById(
   "startSpeedTestBtn",
 ) as HTMLButtonElement;
 
+let currentTabId: number | null = null;
+
 if (analyzeBtn) {
   analyzeBtn.addEventListener("click", async () => {
     if (await saveWpmSetting()) {
@@ -144,6 +146,28 @@ async function analyzeCurrentPage(): Promise<void> {
     console.error("Error:", error);
     showError("Error analyzing page");
   }
+}
+
+function handleActiveTabChanged(tabId: number) {
+  if (tabId === currentTabId) return;
+  currentTabId = tabId;
+
+  window.close();
+}
+
+async function initTabChangeListeners(): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  currentTabId = tab?.id ?? null;
+
+  const onActivated = ({ tabId }: chrome.tabs.OnActivatedInfo) => {
+    handleActiveTabChanged(tabId);
+  };
+
+  chrome.tabs.onActivated.addListener(onActivated);
+
+  window.addEventListener("unload", () => {
+    chrome.tabs.onActivated.removeListener(onActivated);
+  });
 }
 
 /**
@@ -441,6 +465,8 @@ async function loadDebugSetting(): Promise<void> {
 
 // Load stats and settings when popup opens
 window.addEventListener("load", async () => {
+  await initTabChangeListeners();
+
   loadDebugSetting();
   loadCustomArticleState();
   await loadWpmSetting();
