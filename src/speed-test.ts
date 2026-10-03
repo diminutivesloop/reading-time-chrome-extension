@@ -14,6 +14,9 @@ import { setWordsPerMinute } from "./wpm-storage";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";
 const TIMER_STYLE_ID = "reading-time-speed-timer-style";
+const DISMISS_ICON = `
+  <img src="https://api.iconify.design/tabler/x.svg?color=%23ffffff" width="16" height="16" alt="" />
+`;
 
 let testStartTime: number | null = null;
 let testIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -44,10 +47,6 @@ function ensureTimerStyles(): void {
       gap: 16px;
       min-width: 280px;
       user-select: none;
-    }
-    #${TIMER_BAR_ID} .rt-timer-icon {
-      font-size: 18px;
-      line-height: 1;
     }
     #${TIMER_BAR_ID} .rt-timer-body {
       flex: 1;
@@ -102,6 +101,12 @@ function ensureTimerStyles(): void {
     #${TIMER_BAR_ID} .rt-btn-dismiss {
       background: rgba(255,255,255,0.12);
       color: #fff;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   `;
   document.head.appendChild(style);
@@ -127,13 +132,12 @@ function showTimerBar(): void {
   bar.id = TIMER_BAR_ID;
 
   bar.innerHTML = `
-    <span class="rt-timer-icon">⏱</span>
     <div class="rt-timer-body">
       <span class="rt-timer-label">Reading Speed Test</span>
       <span class="rt-timer-value">0:00</span>
     </div>
     <button class="rt-btn rt-btn-stop">Finish</button>
-    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">✕</button>
+    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">${DISMISS_ICON}</button>
   `;
 
   document.body.appendChild(bar);
@@ -155,13 +159,12 @@ function showResultBar(measuredWpm: number): void {
   if (!bar) return;
 
   bar.innerHTML = `
-    <span class="rt-timer-icon">📖</span>
     <div class="rt-timer-body">
       <span class="rt-timer-label">Your Reading Speed</span>
       <span class="rt-timer-result">${measuredWpm.toLocaleString()} WPM</span>
     </div>
     <button class="rt-btn rt-btn-save">Save as WPM</button>
-    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">✕</button>
+    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">${DISMISS_ICON}</button>
   `;
 
   const saveBtn = bar.querySelector<HTMLButtonElement>(".rt-btn-save")!;
@@ -173,7 +176,7 @@ function showResultBar(measuredWpm: number): void {
     }
 
     saveBtn.disabled = true;
-    saveBtn.textContent = "Saved ✓";
+    saveBtn.textContent = "Saved";
     setWordsPerMinute(measuredWpm);
     onWpmSavedCallback?.(measuredWpm);
   });
