@@ -41,6 +41,7 @@ Words per minute can be customized in the popup. Click the reset button to rever
 ## Future Enhancements
 
 - [x] Customizable reading speed
+- [ ] Calculate reading speed as average
 - [ ] Reading time indicator on page
 - [x] Show reading time in tab titles
 - [x] Measure actual reading speed
