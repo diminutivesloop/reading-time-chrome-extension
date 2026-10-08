@@ -16,7 +16,31 @@
       "label": "esbuild: watch",
       "type": "shell",
       "command": "npm run watch",
-      "problemMatcher": [],
+      "problemMatcher": {
+        "owner": "esbuild",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": [
+          {
+            "regexp": "^✘ \\[(ERROR|WARNING)\\] (.*)$",
+            "severity": 1,
+            "message": 2
+          },
+          {
+            "regexp": "^\\s*$"
+          },
+          {
+            "regexp": "^\\s*(.+):(\\d+):(\\d+):$",
+            "file": 1,
+            "line": 2,
+            "column": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[watch\\] build started",
+          "endsPattern": "^\\[watch\\] build finished"
+        }
+      },
       "group": "build",
       "isBackground": true,
       "runOptions": {
