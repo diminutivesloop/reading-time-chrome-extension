@@ -1,9 +1,25 @@
 import esbuild from "esbuild";
-import { cp, rm, stat } from "fs/promises";
+import { cp, readFile, rm, stat } from "fs/promises";
 import { watch } from "fs";
+import { resolve } from "path";
 
 const isWatch = process.argv.includes("--watch");
 const outdir = "dist";
+
+const inlineCssPlugin = {
+  name: "inline-css",
+  setup(build) {
+    build.onResolve({ filter: /\.css$/ }, (args) => ({
+      path: resolve(args.resolveDir, args.path),
+      namespace: "inline-css",
+    }));
+    build.onLoad({ filter: /.*/, namespace: "inline-css" }, async (args) => ({
+      contents: `export default ${JSON.stringify(await readFile(args.path, "utf8"))};`,
+      loader: "js",
+      watchFiles: [args.path],
+    }));
+  },
+};
 
 /** @type {import("esbuild").BuildOptions} */
 const buildOptions = {
@@ -19,12 +35,14 @@ const buildOptions = {
   format: "iife",
   sourcemap: true,
   logLevel: "info",
+  plugins: [inlineCssPlugin],
 };
 
 const assetFiles = [
   { src: "manifest.json", dest: `${outdir}/manifest.json` },
   { src: "src/popup.html", dest: `${outdir}/popup.html` },
   { src: "src/popup.css", dest: `${outdir}/popup.css` },
+  { src: "src/theme.css", dest: `${outdir}/theme.css` },
 ];
 
 async function copyAssets() {

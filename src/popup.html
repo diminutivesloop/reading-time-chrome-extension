@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reading Time</title>
+    <link rel="stylesheet" href="theme.css" />
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
@@ -21,39 +22,52 @@
           <input type="number" id="wpmInput" min="50" max="1000" step="10" />
           <button
             id="resetWpmBtn"
-            class="btn btn-secondary btn-icon"
+            class="btn btn-icon reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon"
             title="Reset to default"
             aria-label="Reset words per minute to default"
           >
             <img
-              src="https://api.iconify.design/tabler/reload.svg?color=%23667eea"
+              src="https://api.iconify.design/tabler/reload.svg?color=%23712636"
               alt=""
             />
           </button>
         </div>
       </div>
 
-      <button id="analyzeBtn" class="btn btn-primary">
+      <button
+        id="analyzeBtn"
+        class="btn reading-time-ui-button reading-time-ui-button-primary"
+      >
         <span>Analyze Page</span>
       </button>
 
-      <button id="startSpeedTestBtn" class="btn btn-secondary">
+      <button
+        id="startSpeedTestBtn"
+        class="btn reading-time-ui-button reading-time-ui-button-secondary"
+      >
         <img
-          src="https://api.iconify.design/tabler/stopwatch.svg?color=%23667eea"
+          src="https://api.iconify.design/tabler/stopwatch.svg?color=%23712636"
           alt=""
         />
         <span>Measure Reading Speed</span>
       </button>
-      <button id="customArticleSelectionBtn" class="btn btn-secondary">
+      <button
+        id="customArticleSelectionBtn"
+        class="btn reading-time-ui-button reading-time-ui-button-secondary"
+      >
         <img
-          src="https://api.iconify.design/tabler/article.svg?color=%23667eea"
+          src="https://api.iconify.design/tabler/article.svg?color=%23712636"
           alt=""
         />
         <span>Select Article Text</span>
       </button>
-      <button id="resetCustomArticleBtn" class="btn btn-secondary" hidden>
+      <button
+        id="resetCustomArticleBtn"
+        class="btn reading-time-ui-button reading-time-ui-button-secondary"
+        hidden
+      >
         <img
-          src="https://api.iconify.design/tabler/reload.svg?color=%23667eea"
+          src="https://api.iconify.design/tabler/reload.svg?color=%23712636"
           alt=""
         />
         <span>Reset Article Text</span>

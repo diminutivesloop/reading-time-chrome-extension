@@ -4,6 +4,8 @@
  * the nearest common ancestor as the article container.
  */
 
+import themeCss from "./theme.css";
+
 export const SELECTION_STYLE_ID = "reading-time-article-selection-style";
 export const SELECTION_HUD_ID = "reading-time-article-selection-hud";
 export const HOVER_CLASS = "reading-time-article-selection-hover";
@@ -49,44 +51,26 @@ function ensureSelectionStyles(): void {
 
   const style = document.createElement("style");
   style.id = SELECTION_STYLE_ID;
-  style.textContent = `
+  style.textContent = `${themeCss}
     #${SELECTION_HUD_ID} {
       position: fixed;
       bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 2147483647;
-      background: #0f172a;
-      color: #e2e8f0;
-      border: 1px solid #334155;
+      background: var(--reading-time-sepia);
+      color: var(--reading-time-burgundy);
+      border: 1px solid var(--reading-time-burgundy);
       border-radius: 10px;
-      box-shadow: 0 10px 32px rgba(15, 23, 42, 0.45);
+      box-shadow: 0 8px 24px var(--reading-time-burgundy-shadow);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 13px;
       font-weight: 600;
       padding: 10px 14px;
-      pointer-events: none;
       display: flex;
       align-items: center;
       gap: 12px;
       white-space: nowrap;
-    }
-
-    #${SELECTION_HUD_ID} .${HUD_CANCEL_CLASS} {
-      pointer-events: auto;
-      background: #334155;
-      color: #e2e8f0;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      cursor: pointer;
-      line-height: 1.4;
-    }
-
-    #${SELECTION_HUD_ID} .${HUD_CANCEL_CLASS}:hover {
-      background: #475569;
     }
 
     .${HOVER_CLASS} {
@@ -102,22 +86,6 @@ function ensureSelectionStyles(): void {
       background: rgba(34, 197, 94, 0.1) !important;
     }
 
-    #${SELECTION_HUD_ID} .${HUD_CONFIRM_CLASS} {
-      pointer-events: auto;
-      background: #22c55e;
-      color: #052e16;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      cursor: pointer;
-      line-height: 1.4;
-    }
-
-    #${SELECTION_HUD_ID} .${HUD_CONFIRM_CLASS}:hover {
-      background: #16a34a;
-    }
   `;
 
   document.head.appendChild(style);
@@ -130,13 +98,14 @@ function removeSelectionStyles(): void {
 function showHud(text: string): HTMLDivElement {
   const hud = document.createElement("div");
   hud.id = SELECTION_HUD_ID;
+  hud.addEventListener("click", (event) => event.stopPropagation());
 
   const msg = document.createElement("span");
   msg.className = HUD_MESSAGE_CLASS;
   msg.textContent = text;
 
   const cancelBtn = document.createElement("button");
-  cancelBtn.className = HUD_CANCEL_CLASS;
+  cancelBtn.className = `${HUD_CANCEL_CLASS} reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-compact`;
   cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
 
@@ -161,13 +130,13 @@ function switchHudToConfirmation(
   hud.querySelector(`.${HUD_CANCEL_CLASS}`)?.remove();
 
   const confirmBtn = document.createElement("button");
-  confirmBtn.className = HUD_CONFIRM_CLASS;
+  confirmBtn.className = `${HUD_CONFIRM_CLASS} reading-time-ui-button reading-time-ui-button-primary reading-time-ui-button-compact`;
   confirmBtn.type = "button";
   confirmBtn.textContent = "Confirm";
   confirmBtn.addEventListener("click", onConfirm);
 
   const cancelBtn = document.createElement("button");
-  cancelBtn.className = HUD_CANCEL_CLASS;
+  cancelBtn.className = `${HUD_CANCEL_CLASS} reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-compact`;
   cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
   cancelBtn.addEventListener("click", onCancel);

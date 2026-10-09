@@ -8,3 +8,4 @@
 - Use concise class names and nesting when possible for css styles
 - Test meaningful, reasonably complex logic and prefer real behavior over extensive mocks
 - Validate changes with `npm test`, `npm run typecheck`, and `npm run build` when applicable
+- If not running in VSCode environment make sure to run `npm run build` after making changes so they can be manually tested
