@@ -11,11 +11,12 @@ import {
   isValidWordsPerMinute,
 } from "./shared";
 import { setWordsPerMinute } from "./wpm-storage";
+import themeCss from "./theme.css";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";
 const TIMER_STYLE_ID = "reading-time-speed-timer-style";
 const DISMISS_ICON = `
-  <img src="https://api.iconify.design/tabler/x.svg?color=%23ffffff" width="16" height="16" alt="" />
+  <img src="https://api.iconify.design/tabler/x.svg?color=%23712636" width="16" height="16" alt="" />
 `;
 
 let testStartTime: number | null = null;
@@ -29,24 +30,38 @@ function ensureTimerStyles(): void {
   if (document.getElementById(TIMER_STYLE_ID)) return;
   const style = document.createElement("style");
   style.id = TIMER_STYLE_ID;
-  style.textContent = `
+  style.textContent = `${themeCss}
     #${TIMER_BAR_ID} {
       position: fixed;
       bottom: 24px;
       right: 24px;
       z-index: 2147483647;
-      background: #1a1a2e;
-      color: #fff;
+      background: var(--reading-time-sepia);
+      color: var(--reading-time-burgundy);
+      border: 1px solid var(--reading-time-burgundy);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
       border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+      box-shadow: 0 8px 24px var(--reading-time-burgundy-shadow);
       padding: 14px 20px;
       display: flex;
       align-items: center;
       gap: 16px;
       min-width: 280px;
       user-select: none;
+    }
+    #${TIMER_BAR_ID} .rt-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    #${TIMER_BAR_ID} .rt-btn-dismiss {
+      width: 34px;
+      min-width: 34px;
+      height: 34px;
+      padding: 0;
     }
     #${TIMER_BAR_ID} .rt-timer-body {
       flex: 1;
@@ -59,54 +74,21 @@ function ensureTimerStyles(): void {
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
+      color: var(--reading-time-burgundy);
     }
     #${TIMER_BAR_ID} .rt-timer-value {
       font-size: 18px;
       font-weight: 700;
       letter-spacing: 0.02em;
-      color: #a78bfa;
+      color: var(--reading-time-burgundy);
     }
     #${TIMER_BAR_ID} .rt-timer-result {
       font-size: 18px;
       font-weight: 700;
-      color: #6ee7b7;
-    }
-    #${TIMER_BAR_ID} .rt-btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.15s;
-    }
-    #${TIMER_BAR_ID} .rt-btn:hover { opacity: 0.85; }
-    #${TIMER_BAR_ID} .rt-btn:active { opacity: 0.7; }
-    #${TIMER_BAR_ID} .rt-btn-stop {
-      background: #6ee7b7;
-      color: #064e3b;
-    }
-    #${TIMER_BAR_ID} .rt-btn-save {
-      background: #6ee7b7;
-      color: #064e3b;
+      color: var(--reading-time-burgundy);
     }
     #${TIMER_BAR_ID} .rt-btn-save:disabled {
-      background: #6ee7b7;
-      color: #064e3b;
       opacity: 0.5;
-      cursor: default;
-    }
-    #${TIMER_BAR_ID} .rt-btn-dismiss {
-      background: rgba(255,255,255,0.12);
-      color: #fff;
-      width: 34px;
-      height: 34px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
   `;
   document.head.appendChild(style);
@@ -136,8 +118,8 @@ function showTimerBar(): void {
       <span class="rt-timer-label">Reading Speed Test</span>
       <span class="rt-timer-value">0:00</span>
     </div>
-    <button class="rt-btn rt-btn-stop">Finish</button>
-    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">${DISMISS_ICON}</button>
+    <button class="rt-btn rt-btn-stop reading-time-ui-button reading-time-ui-button-primary">Finish</button>
+    <button class="rt-btn rt-btn-dismiss reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon" aria-label="Dismiss">${DISMISS_ICON}</button>
   `;
 
   document.body.appendChild(bar);
@@ -163,8 +145,8 @@ function showResultBar(measuredWpm: number): void {
       <span class="rt-timer-label">Your Reading Speed</span>
       <span class="rt-timer-result">${measuredWpm.toLocaleString()} WPM</span>
     </div>
-    <button class="rt-btn rt-btn-save">Save as WPM</button>
-    <button class="rt-btn rt-btn-dismiss" aria-label="Dismiss">${DISMISS_ICON}</button>
+    <button class="rt-btn rt-btn-save reading-time-ui-button reading-time-ui-button-primary">Save as WPM</button>
+    <button class="rt-btn rt-btn-dismiss reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon" aria-label="Dismiss">${DISMISS_ICON}</button>
   `;
 
   const saveBtn = bar.querySelector<HTMLButtonElement>(".rt-btn-save")!;
