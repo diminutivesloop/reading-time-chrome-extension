@@ -203,15 +203,7 @@ void restorePersistedReadingTitle();
 window.addEventListener("popstate", handlePageNavigation);
 window.addEventListener("hashchange", handlePageNavigation);
 
-// TODO: remove after upgrade to TS 6
-const navigationApi = (
-  window as Window & {
-    navigation?: {
-      addEventListener: (type: "navigate", listener: () => void) => void;
-    };
-  }
-).navigation;
-navigationApi?.addEventListener("navigate", () =>
+window.navigation?.addEventListener("navigate", () =>
   queueMicrotask(handlePageNavigation),
 );
 
