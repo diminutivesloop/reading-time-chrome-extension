@@ -4,7 +4,10 @@
   "name": "Reading Time",
   "version": "1.0.0",
   "description": "Displays approximate reading time for articles and web pages",
-  "permissions": ["storage"],
+  "permissions": ["storage", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Reading Time"

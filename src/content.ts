@@ -3,7 +3,12 @@
  * Analyzes page content for reading statistics
  */
 
-import type { MessageRequest, MessageResponse } from "./messages";
+import type {
+  GetPersistedReadingTitleMessage,
+  GetPersistedReadingTitleResponse,
+  MessageRequest,
+  MessageResponse,
+} from "./messages";
 import type { PageStats } from "./page-stats";
 import { countWords } from "./shared";
 import { isDebugActive, enableDebugMode, disableDebugMode } from "./debug";
@@ -22,6 +27,8 @@ import {
 
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
+let persistedReadingTitle: string | null = null;
+let lastKnownPageUrl = location.href;
 
 let customArticleElement: HTMLElement | null = null;
 let persistedArticleElement: HTMLElement | null = null;
@@ -91,6 +98,14 @@ function appendReadingTimeToTitle(minutes: number): void {
   const updatedTitle = `[${readingTimeLabel}] ${originalPageTitle}`;
   document.title = updatedTitle;
   lastAppliedReadingTitle = updatedTitle;
+  persistedReadingTitle = updatedTitle;
+  chrome.runtime
+    .sendMessage({
+      action: "saveReadingTitle",
+      title: updatedTitle,
+      url: location.href,
+    })
+    .catch((error) => console.error("Error saving reading-time title:", error));
 }
 
 /**
@@ -103,6 +118,102 @@ function updateTitleWithStats(wordsPerMinute: number): PageStats {
   }
   return stats;
 }
+
+async function restorePersistedReadingTitle(): Promise<void> {
+  try {
+    const request: GetPersistedReadingTitleMessage = {
+      action: "getPersistedReadingTitle",
+      url: location.href,
+    };
+    const response = (await chrome.runtime.sendMessage(request)) as
+      GetPersistedReadingTitleResponse | undefined;
+    if (
+      response?.title &&
+      request.url === lastKnownPageUrl &&
+      !lastAppliedReadingTitle
+    ) {
+      persistedReadingTitle = response.title;
+      document.title = response.title;
+      lastAppliedReadingTitle = response.title;
+      console.debug(
+        "[Reading Time] Restored tab title in page",
+        response.title,
+      );
+    }
+  } catch (error) {
+    console.error("Error loading persisted reading-time title:", error);
+  }
+}
+
+function resetReadingTitleAfterPageChange(): void {
+  if (lastAppliedReadingTitle && document.title === lastAppliedReadingTitle) {
+    document.title = originalPageTitle;
+  }
+
+  originalPageTitle = document.title;
+  lastAppliedReadingTitle = null;
+  persistedReadingTitle = null;
+  console.debug("[Reading Time] Reset title state after page change");
+}
+
+function handlePageNavigation(): void {
+  if (location.href === lastKnownPageUrl) return;
+
+  lastKnownPageUrl = location.href;
+  resetReadingTitleAfterPageChange();
+  chrome.runtime
+    .sendMessage({ action: "pageChanged", url: lastKnownPageUrl })
+    .catch((error) =>
+      console.error(
+        "Error clearing reading-time title after page change:",
+        error,
+      ),
+    );
+}
+
+type ReadingTimeWindow = Window & {
+  readingTimeTitleObserver?: MutationObserver;
+};
+
+const readingTimeWindow = window as ReadingTimeWindow;
+readingTimeWindow.readingTimeTitleObserver?.disconnect();
+
+const titleObserver = new MutationObserver(() => {
+  if (!persistedReadingTitle || document.title === persistedReadingTitle) {
+    return;
+  }
+
+  console.debug(
+    "[Reading Time] Restoring tab title after page overwrite",
+    persistedReadingTitle,
+  );
+  document.title = persistedReadingTitle;
+  lastAppliedReadingTitle = persistedReadingTitle;
+});
+
+titleObserver.observe(document.head, {
+  characterData: true,
+  childList: true,
+  subtree: true,
+});
+readingTimeWindow.readingTimeTitleObserver = titleObserver;
+
+void restorePersistedReadingTitle();
+
+window.addEventListener("popstate", handlePageNavigation);
+window.addEventListener("hashchange", handlePageNavigation);
+
+// TODO: remove after upgrade to TS 6
+const navigationApi = (
+  window as Window & {
+    navigation?: {
+      addEventListener: (type: "navigate", listener: () => void) => void;
+    };
+  }
+).navigation;
+navigationApi?.addEventListener("navigate", () =>
+  queueMicrotask(handlePageNavigation),
+);
 
 /**
  * Apply a selected article container and refresh reading-time title estimate.
@@ -183,8 +294,6 @@ async function applyPersistedArticleSelector(): Promise<void> {
     disableDebugMode();
     enableDebugMode();
   }
-
-  updateTitleWithStats(await getWordsPerMinute());
 }
 
 const persistedSelectorLoaded = applyPersistedArticleSelector().catch((error) =>
@@ -257,6 +366,9 @@ chrome.runtime.onMessage.addListener(
         console.error("Error resetting custom article:", error);
         sendResponse({ action: "resetCustomArticle", success: false });
       }
+    } else if (request.action === "pageChanged") {
+      resetReadingTitleAfterPageChange();
+      sendResponse();
     }
   },
 );

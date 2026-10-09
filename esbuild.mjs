@@ -8,6 +8,7 @@ const outdir = "dist";
 /** @type {import("esbuild").BuildOptions} */
 const buildOptions = {
   entryPoints: {
+    background: "src/background.ts",
     content: "src/content.ts",
     popup: "src/popup.ts",
   },

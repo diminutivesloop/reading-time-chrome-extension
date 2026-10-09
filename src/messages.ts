@@ -33,6 +33,22 @@ export interface ResetCustomArticleMessage {
   action: "resetCustomArticle";
 }
 
+export interface GetPersistedReadingTitleMessage {
+  action: "getPersistedReadingTitle";
+  url: string;
+}
+
+export interface SaveReadingTitleMessage {
+  action: "saveReadingTitle";
+  title: string;
+  url: string;
+}
+
+export interface PageChangedMessage {
+  action: "pageChanged";
+  url?: string;
+}
+
 export type MessageRequest =
   | GetPageStatsMessage
   | ToggleDebugMessage
@@ -40,7 +56,10 @@ export type MessageRequest =
   | StartReadingTestMessage
   | StartCustomArticleSelectionMessage
   | GetCustomArticleStateMessage
-  | ResetCustomArticleMessage;
+  | ResetCustomArticleMessage
+  | GetPersistedReadingTitleMessage
+  | SaveReadingTitleMessage
+  | PageChangedMessage;
 
 /**
  * Message responses sent back from the content script
@@ -65,8 +84,14 @@ export interface ResetCustomArticleResponse {
   success: boolean;
 }
 
+export interface GetPersistedReadingTitleResponse {
+  action: "getPersistedReadingTitle";
+  title?: string;
+}
+
 export type MessageResponse =
   | GetPageStatsResponse
   | GetDebugStateResponse
   | GetCustomArticleStateResponse
-  | ResetCustomArticleResponse;
+  | ResetCustomArticleResponse
+  | GetPersistedReadingTitleResponse;
