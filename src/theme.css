@@ -1,4 +1,5 @@
-:root {
+:root,
+:host {
   --reading-time-sepia: #f4ecd8;
   --reading-time-paper: #fffaf0;
   --reading-time-sepia-hover: #ead9b8;
@@ -38,6 +39,7 @@
   }
 
   &:disabled {
+    opacity: 0.5;
     cursor: default;
 
     &:hover {

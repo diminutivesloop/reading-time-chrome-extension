@@ -13,6 +13,7 @@ export const CONTAINER_CLASS = "reading-time-article-selection-container";
 export const HUD_MESSAGE_CLASS = "rt-sel-msg";
 export const HUD_CANCEL_CLASS = "rt-sel-cancel";
 export const HUD_CONFIRM_CLASS = "rt-sel-confirm";
+const HUD_PANEL_CLASS = "rt-sel-panel";
 
 let activeCleanup: (() => void) | null = null;
 
@@ -51,28 +52,7 @@ function ensureSelectionStyles(): void {
 
   const style = document.createElement("style");
   style.id = SELECTION_STYLE_ID;
-  style.textContent = `${themeCss}
-    #${SELECTION_HUD_ID} {
-      position: fixed;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2147483647;
-      background: var(--reading-time-sepia);
-      color: var(--reading-time-burgundy);
-      border: 1px solid var(--reading-time-burgundy);
-      border-radius: 10px;
-      box-shadow: 0 8px 24px var(--reading-time-burgundy-shadow);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      white-space: nowrap;
-    }
-
+  style.textContent = `
     .${HOVER_CLASS} {
       outline: 3px solid #f59e0b !important;
       outline-offset: 2px !important;
@@ -99,6 +79,67 @@ function showHud(text: string): HTMLDivElement {
   const hud = document.createElement("div");
   hud.id = SELECTION_HUD_ID;
   hud.addEventListener("click", (event) => event.stopPropagation());
+  const root = hud.attachShadow({ mode: "open" });
+  const style = document.createElement("style");
+  style.textContent = `${themeCss}
+    :host {
+      all: initial;
+      --reading-time-sepia: #f4ecd8;
+      --reading-time-paper: #fffaf0;
+      --reading-time-burgundy: #712636;
+      --reading-time-burgundy-shadow: rgba(113, 38, 54, 0.2);
+      --reading-time-burgundy-hover-shadow: rgba(113, 38, 54, 0.14);
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      z-index: 2147483647;
+      display: block;
+      width: max-content;
+      height: auto;
+    }
+
+    .${HUD_PANEL_CLASS} {
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      pointer-events: none;
+      background: var(--reading-time-sepia);
+      color: var(--reading-time-burgundy);
+      border: 1px solid var(--reading-time-burgundy);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px var(--reading-time-burgundy-shadow);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 14px;
+    }
+
+    button {
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      margin: 0;
+      pointer-events: auto;
+      border: 0;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .${HUD_CANCEL_CLASS}, .${HUD_CONFIRM_CLASS} {
+      pointer-events: auto;
+    }
+  `;
+  root.appendChild(style);
+  const panel = document.createElement("div");
+  panel.className = HUD_PANEL_CLASS;
 
   const msg = document.createElement("span");
   msg.className = HUD_MESSAGE_CLASS;
@@ -109,14 +150,14 @@ function showHud(text: string): HTMLDivElement {
   cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
 
-  hud.appendChild(msg);
-  hud.appendChild(cancelBtn);
+  panel.append(msg, cancelBtn);
+  root.appendChild(panel);
   document.body.appendChild(hud);
   return hud;
 }
 
 function updateHud(hud: HTMLElement, text: string): void {
-  const msg = hud.querySelector(`.${HUD_MESSAGE_CLASS}`);
+  const msg = hud.shadowRoot?.querySelector(`.${HUD_MESSAGE_CLASS}`);
   if (msg) msg.textContent = text;
 }
 
@@ -127,7 +168,8 @@ function switchHudToConfirmation(
 ): void {
   updateHud(hud, "Use this as the article container?");
 
-  hud.querySelector(`.${HUD_CANCEL_CLASS}`)?.remove();
+  const panel = hud.shadowRoot?.querySelector(`.${HUD_PANEL_CLASS}`);
+  hud.shadowRoot?.querySelector(`.${HUD_CANCEL_CLASS}`)?.remove();
 
   const confirmBtn = document.createElement("button");
   confirmBtn.className = `${HUD_CONFIRM_CLASS} reading-time-ui-button reading-time-ui-button-primary reading-time-ui-button-compact`;
@@ -141,8 +183,7 @@ function switchHudToConfirmation(
   cancelBtn.textContent = "Cancel";
   cancelBtn.addEventListener("click", onCancel);
 
-  hud.appendChild(confirmBtn);
-  hud.appendChild(cancelBtn);
+  panel?.append(confirmBtn, cancelBtn);
 }
 
 function removeHud(): void {
@@ -303,13 +344,16 @@ export function startCustomArticleSelection(): Promise<HTMLElement> {
 
     const onClick = (event: MouseEvent): void => {
       const hudEl = document.getElementById(SELECTION_HUD_ID);
-      const cancelBtn = hudEl?.querySelector(`.${HUD_CANCEL_CLASS}`);
-      if (
-        cancelBtn &&
-        (event.target === cancelBtn || cancelBtn.contains(event.target as Node))
-      ) {
+      const cancelBtn = hudEl?.shadowRoot?.querySelector(
+        `.${HUD_CANCEL_CLASS}`,
+      );
+      if (cancelBtn && event.composedPath().includes(cancelBtn)) {
         event.stopImmediatePropagation();
         cleanup();
+        return;
+      }
+      if (hudEl && event.composedPath().includes(hudEl)) {
+        event.stopImmediatePropagation();
         return;
       }
 

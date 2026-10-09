@@ -14,7 +14,15 @@ import { setWordsPerMinute } from "./wpm-storage";
 import themeCss from "./theme.css";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";
-const TIMER_STYLE_ID = "reading-time-speed-timer-style";
+const TIMER_CONTENT_CLASS = "timer";
+const TIMER_BODY_CLASS = "rt-timer-body";
+const TIMER_LABEL_CLASS = "rt-timer-label";
+const TIMER_VALUE_CLASS = "rt-timer-value";
+const TIMER_RESULT_CLASS = "rt-timer-result";
+const TIMER_BUTTON_CLASS = "rt-btn";
+const TIMER_STOP_BUTTON_CLASS = "rt-btn-stop";
+const TIMER_SAVE_BUTTON_CLASS = "rt-btn-save";
+const TIMER_DISMISS_BUTTON_CLASS = "rt-btn-dismiss";
 const DISMISS_ICON = `
   <img src="https://api.iconify.design/tabler/x.svg?color=%23712636" width="16" height="16" alt="" />
 `;
@@ -23,19 +31,32 @@ let testStartTime: number | null = null;
 let testIntervalId: ReturnType<typeof setInterval> | null = null;
 let onWpmSavedCallback: ((wpm: number) => void) | null = null;
 
-/**
- * Inject styles for the floating reading-speed timer bar
- */
-function ensureTimerStyles(): void {
-  if (document.getElementById(TIMER_STYLE_ID)) return;
+function createTimerBar(): {
+  host: HTMLDivElement;
+  bar: HTMLDivElement;
+} {
+  const host = document.createElement("div");
+  host.id = TIMER_BAR_ID;
+  const root = host.attachShadow({ mode: "open" });
   const style = document.createElement("style");
-  style.id = TIMER_STYLE_ID;
   style.textContent = `${themeCss}
-    #${TIMER_BAR_ID} {
+    :host {
+      all: initial;
+      --reading-time-sepia: #f4ecd8;
+      --reading-time-paper: #fffaf0;
+      --reading-time-burgundy: #712636;
+      --reading-time-burgundy-shadow: rgba(113, 38, 54, 0.2);
+      --reading-time-burgundy-hover-shadow: rgba(113, 38, 54, 0.14);
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      inset: auto 24px 24px auto;
       z-index: 2147483647;
+      display: block;
+      width: max-content;
+      height: auto;
+    }
+
+    .${TIMER_CONTENT_CLASS} {
+      box-sizing: border-box;
       background: var(--reading-time-sepia);
       color: var(--reading-time-burgundy);
       border: 1px solid var(--reading-time-burgundy);
@@ -50,48 +71,65 @@ function ensureTimerStyles(): void {
       min-width: 280px;
       user-select: none;
     }
-    #${TIMER_BAR_ID} .rt-btn {
+    .${TIMER_BUTTON_CLASS} {
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      margin: 0;
       padding: 8px 16px;
-      border-radius: 8px;
+      border: none;
+      border-radius: 6px;
       font-size: 13px;
       font-weight: 600;
+      cursor: pointer;
       white-space: nowrap;
+      transition: opacity 0.15s;
     }
-    #${TIMER_BAR_ID} .rt-btn-dismiss {
+    .${TIMER_BUTTON_CLASS}:hover { opacity: 0.85; }
+    .${TIMER_BUTTON_CLASS}:active { opacity: 0.7; }
+    .${TIMER_SAVE_BUTTON_CLASS}:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .${TIMER_DISMISS_BUTTON_CLASS} {
       width: 34px;
       min-width: 34px;
       height: 34px;
       padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #${TIMER_BAR_ID} .rt-timer-body {
+    .${TIMER_BODY_CLASS} {
       flex: 1;
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
-    #${TIMER_BAR_ID} .rt-timer-label {
+    .${TIMER_LABEL_CLASS} {
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--reading-time-burgundy);
     }
-    #${TIMER_BAR_ID} .rt-timer-value {
+    .${TIMER_VALUE_CLASS} {
       font-size: 18px;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: var(--reading-time-burgundy);
     }
-    #${TIMER_BAR_ID} .rt-timer-result {
+    .${TIMER_RESULT_CLASS} {
       font-size: 18px;
       font-weight: 700;
       color: var(--reading-time-burgundy);
     }
-    #${TIMER_BAR_ID} .rt-btn-save:disabled {
-      opacity: 0.5;
-    }
   `;
-  document.head.appendChild(style);
+  root.appendChild(style);
+  const bar = document.createElement("div");
+  bar.className = TIMER_CONTENT_CLASS;
+  root.appendChild(bar);
+  return { host, bar };
 }
 
 /**
@@ -108,48 +146,52 @@ function formatElapsed(seconds: number): string {
  */
 function showTimerBar(): void {
   removeTimerBar();
-  ensureTimerStyles();
-
-  const bar = document.createElement("div");
-  bar.id = TIMER_BAR_ID;
-
+  const { host, bar } = createTimerBar();
   bar.innerHTML = `
-    <div class="rt-timer-body">
-      <span class="rt-timer-label">Reading Speed Test</span>
-      <span class="rt-timer-value">0:00</span>
+    <div class="${TIMER_BODY_CLASS}">
+      <span class="${TIMER_LABEL_CLASS}">Reading Speed Test</span>
+      <span class="${TIMER_VALUE_CLASS}">0:00</span>
     </div>
-    <button class="rt-btn rt-btn-stop reading-time-ui-button reading-time-ui-button-primary">Finish</button>
-    <button class="rt-btn rt-btn-dismiss reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon" aria-label="Dismiss">${DISMISS_ICON}</button>
+  <button class="${TIMER_BUTTON_CLASS} ${TIMER_STOP_BUTTON_CLASS} reading-time-ui-button reading-time-ui-button-primary">Finish</button>
+  <button class="${TIMER_BUTTON_CLASS} ${TIMER_DISMISS_BUTTON_CLASS} reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon" aria-label="Dismiss">${DISMISS_ICON}</button>
   `;
 
-  document.body.appendChild(bar);
+  document.body.appendChild(host);
 
-  bar.querySelector(".rt-btn-stop")!.addEventListener("click", () => {
-    finishReadingTest();
-  });
+  bar
+    .querySelector(`.${TIMER_STOP_BUTTON_CLASS}`)!
+    .addEventListener("click", () => {
+      finishReadingTest();
+    });
 
-  bar.querySelector(".rt-btn-dismiss")!.addEventListener("click", () => {
-    cancelReadingTest();
-  });
+  bar
+    .querySelector(`.${TIMER_DISMISS_BUTTON_CLASS}`)!
+    .addEventListener("click", () => {
+      cancelReadingTest();
+    });
 }
 
 /**
  * Switch the timer bar to the "stopped / result" state
  */
 function showResultBar(measuredWpm: number): void {
-  const bar = document.getElementById(TIMER_BAR_ID);
+  const bar = document
+    .getElementById(TIMER_BAR_ID)
+    ?.shadowRoot?.querySelector(`.${TIMER_CONTENT_CLASS}`);
   if (!bar) return;
 
   bar.innerHTML = `
-    <div class="rt-timer-body">
-      <span class="rt-timer-label">Your Reading Speed</span>
-      <span class="rt-timer-result">${measuredWpm.toLocaleString()} WPM</span>
+    <div class="${TIMER_BODY_CLASS}">
+      <span class="${TIMER_LABEL_CLASS}">Your Reading Speed</span>
+      <span class="${TIMER_RESULT_CLASS}">${measuredWpm.toLocaleString()} WPM</span>
     </div>
-    <button class="rt-btn rt-btn-save reading-time-ui-button reading-time-ui-button-primary">Save as WPM</button>
-    <button class="rt-btn rt-btn-dismiss reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon" aria-label="Dismiss">${DISMISS_ICON}</button>
+  <button class="${TIMER_BUTTON_CLASS} ${TIMER_SAVE_BUTTON_CLASS} reading-time-ui-button reading-time-ui-button-primary">Save as WPM</button>
+  <button class="${TIMER_BUTTON_CLASS} ${TIMER_DISMISS_BUTTON_CLASS} reading-time-ui-button reading-time-ui-button-secondary reading-time-ui-button-icon" aria-label="Dismiss">${DISMISS_ICON}</button>
   `;
 
-  const saveBtn = bar.querySelector<HTMLButtonElement>(".rt-btn-save")!;
+  const saveBtn = bar.querySelector<HTMLButtonElement>(
+    `.${TIMER_SAVE_BUTTON_CLASS}`,
+  )!;
   saveBtn.addEventListener("click", async () => {
     if (!isValidWordsPerMinute(measuredWpm)) {
       saveBtn.disabled = true;
@@ -163,9 +205,11 @@ function showResultBar(measuredWpm: number): void {
     onWpmSavedCallback?.(measuredWpm);
   });
 
-  bar.querySelector(".rt-btn-dismiss")!.addEventListener("click", () => {
-    removeTimerBar();
-  });
+  bar
+    .querySelector(`.${TIMER_DISMISS_BUTTON_CLASS}`)!
+    .addEventListener("click", () => {
+      removeTimerBar();
+    });
 }
 
 /**
@@ -173,7 +217,6 @@ function showResultBar(measuredWpm: number): void {
  */
 function removeTimerBar(): void {
   document.getElementById(TIMER_BAR_ID)?.remove();
-  document.getElementById(TIMER_STYLE_ID)?.remove();
 }
 
 /**
@@ -213,8 +256,9 @@ export function startReadingTest(onWpmSaved: (wpm: number) => void): void {
   showTimerBar();
 
   testIntervalId = setInterval(() => {
-    const bar = document.getElementById(TIMER_BAR_ID);
-    const valueEl = bar?.querySelector(".rt-timer-value");
+    const valueEl = document
+      .getElementById(TIMER_BAR_ID)
+      ?.shadowRoot?.querySelector(`.${TIMER_VALUE_CLASS}`);
     if (valueEl && testStartTime !== null) {
       const elapsed = Math.floor((Date.now() - testStartTime) / 1000);
       valueEl.textContent = formatElapsed(elapsed);
