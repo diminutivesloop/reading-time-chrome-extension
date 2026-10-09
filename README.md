@@ -43,11 +43,13 @@ Words per minute can be customized in the popup. Click the reset button to rever
 - [x] Customizable reading speed
 - [ ] Calculate reading speed as average
 - [ ] Reading time indicator on page
+- [ ] Use https://github.com/mozilla/readability for more accurate article extraction
 - [x] Show reading time in tab titles
 - [x] Measure actual reading speed
 - [x] Custom selection of reading text
 - [x] Persistent article selection per page/site
 - [x] Debug mode that shows what text is analyzed and where the word boundaries are
+- [ ] Full e2e tests
 
 ## Known Issues
 
