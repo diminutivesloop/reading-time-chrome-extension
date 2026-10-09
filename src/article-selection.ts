@@ -11,6 +11,7 @@ export const CONTAINER_CLASS = "reading-time-article-selection-container";
 export const HUD_MESSAGE_CLASS = "rt-sel-msg";
 export const HUD_CANCEL_CLASS = "rt-sel-cancel";
 export const HUD_CONFIRM_CLASS = "rt-sel-confirm";
+const HUD_PANEL_CLASS = "rt-sel-panel";
 
 let activeCleanup: (() => void) | null = null;
 
@@ -50,45 +51,6 @@ function ensureSelectionStyles(): void {
   const style = document.createElement("style");
   style.id = SELECTION_STYLE_ID;
   style.textContent = `
-    #${SELECTION_HUD_ID} {
-      position: fixed;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2147483647;
-      background: #0f172a;
-      color: #e2e8f0;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      box-shadow: 0 10px 32px rgba(15, 23, 42, 0.45);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 10px 14px;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      white-space: nowrap;
-    }
-
-    #${SELECTION_HUD_ID} .${HUD_CANCEL_CLASS} {
-      pointer-events: auto;
-      background: #334155;
-      color: #e2e8f0;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      cursor: pointer;
-      line-height: 1.4;
-    }
-
-    #${SELECTION_HUD_ID} .${HUD_CANCEL_CLASS}:hover {
-      background: #475569;
-    }
-
     .${HOVER_CLASS} {
       outline: 3px solid #f59e0b !important;
       outline-offset: 2px !important;
@@ -102,22 +64,6 @@ function ensureSelectionStyles(): void {
       background: rgba(34, 197, 94, 0.1) !important;
     }
 
-    #${SELECTION_HUD_ID} .${HUD_CONFIRM_CLASS} {
-      pointer-events: auto;
-      background: #22c55e;
-      color: #052e16;
-      border: none;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 10px;
-      cursor: pointer;
-      line-height: 1.4;
-    }
-
-    #${SELECTION_HUD_ID} .${HUD_CONFIRM_CLASS}:hover {
-      background: #16a34a;
-    }
   `;
 
   document.head.appendChild(style);
@@ -130,6 +76,77 @@ function removeSelectionStyles(): void {
 function showHud(text: string): HTMLDivElement {
   const hud = document.createElement("div");
   hud.id = SELECTION_HUD_ID;
+  const root = hud.attachShadow({ mode: "open" });
+  const style = document.createElement("style");
+  style.textContent = `
+    /* Reset inherited page styles at the shadow host boundary. */
+    :host {
+      all: initial;
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      z-index: 2147483647;
+      display: block;
+      width: max-content;
+      height: auto;
+    }
+
+    .${HUD_PANEL_CLASS} {
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      pointer-events: none;
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      box-shadow: 0 10px 32px rgba(15, 23, 42, 0.45);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 14px;
+    }
+
+    button {
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      margin: 0;
+      pointer-events: auto;
+      border: 0;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .${HUD_CANCEL_CLASS} {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    .${HUD_CANCEL_CLASS}:hover {
+      background: #475569;
+    }
+
+    .${HUD_CONFIRM_CLASS} {
+      background: #22c55e;
+      color: #052e16;
+    }
+
+    .${HUD_CONFIRM_CLASS}:hover {
+      background: #16a34a;
+    }
+  `;
+  root.appendChild(style);
+  const panel = document.createElement("div");
+  panel.className = HUD_PANEL_CLASS;
 
   const msg = document.createElement("span");
   msg.className = HUD_MESSAGE_CLASS;
@@ -140,14 +157,14 @@ function showHud(text: string): HTMLDivElement {
   cancelBtn.type = "button";
   cancelBtn.textContent = "Cancel";
 
-  hud.appendChild(msg);
-  hud.appendChild(cancelBtn);
+  panel.append(msg, cancelBtn);
+  root.appendChild(panel);
   document.body.appendChild(hud);
   return hud;
 }
 
 function updateHud(hud: HTMLElement, text: string): void {
-  const msg = hud.querySelector(`.${HUD_MESSAGE_CLASS}`);
+  const msg = hud.shadowRoot?.querySelector(`.${HUD_MESSAGE_CLASS}`);
   if (msg) msg.textContent = text;
 }
 
@@ -158,7 +175,8 @@ function switchHudToConfirmation(
 ): void {
   updateHud(hud, "Use this as the article container?");
 
-  hud.querySelector(`.${HUD_CANCEL_CLASS}`)?.remove();
+  const panel = hud.shadowRoot?.querySelector(`.${HUD_PANEL_CLASS}`);
+  hud.shadowRoot?.querySelector(`.${HUD_CANCEL_CLASS}`)?.remove();
 
   const confirmBtn = document.createElement("button");
   confirmBtn.className = HUD_CONFIRM_CLASS;
@@ -172,8 +190,7 @@ function switchHudToConfirmation(
   cancelBtn.textContent = "Cancel";
   cancelBtn.addEventListener("click", onCancel);
 
-  hud.appendChild(confirmBtn);
-  hud.appendChild(cancelBtn);
+  panel?.append(confirmBtn, cancelBtn);
 }
 
 function removeHud(): void {
@@ -334,13 +351,16 @@ export function startCustomArticleSelection(): Promise<HTMLElement> {
 
     const onClick = (event: MouseEvent): void => {
       const hudEl = document.getElementById(SELECTION_HUD_ID);
-      const cancelBtn = hudEl?.querySelector(`.${HUD_CANCEL_CLASS}`);
-      if (
-        cancelBtn &&
-        (event.target === cancelBtn || cancelBtn.contains(event.target as Node))
-      ) {
+      const cancelBtn = hudEl?.shadowRoot?.querySelector(
+        `.${HUD_CANCEL_CLASS}`,
+      );
+      if (cancelBtn && event.composedPath().includes(cancelBtn)) {
         event.stopImmediatePropagation();
         cleanup();
+        return;
+      }
+      if (hudEl && event.composedPath().includes(hudEl)) {
+        event.stopImmediatePropagation();
         return;
       }
 

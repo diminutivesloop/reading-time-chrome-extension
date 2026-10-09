@@ -7,6 +7,7 @@ import { getArticleElement } from "./content";
 
 const DEBUG_OUTLINE_OVERLAY_CLASS = "reading-time-debug-outline-overlay";
 const DEBUG_LABEL_CLASS = "reading-time-debug-label";
+const DEBUG_OUTLINE_ID = "reading-time-debug-outline";
 const DEBUG_STYLE_ID = "reading-time-debug-style";
 const DEBUG_WORD_CLASS = "reading-time-debug-word";
 
@@ -16,7 +17,7 @@ let debugScrollHandler: (() => void) | null = null;
  * Check if debug mode is currently active on this page
  */
 export function isDebugActive(): boolean {
-  return !!document.querySelector(`.${DEBUG_OUTLINE_OVERLAY_CLASS}`);
+  return !!document.getElementById(DEBUG_OUTLINE_ID);
 }
 
 /**
@@ -77,6 +78,7 @@ export function describeSelector(el: Element): string {
  */
 function createOutlineOverlay(target: HTMLElement): HTMLDivElement {
   const overlay = document.createElement("div");
+  overlay.id = DEBUG_OUTLINE_ID;
   overlay.className = DEBUG_OUTLINE_OVERLAY_CLASS;
 
   const label = document.createElement("div");
@@ -160,7 +162,7 @@ export function enableDebugMode(): void {
  */
 export function disableDebugMode(): void {
   // Remove outline overlay element
-  document.querySelector(`.${DEBUG_OUTLINE_OVERLAY_CLASS}`)?.remove();
+  document.getElementById(DEBUG_OUTLINE_ID)?.remove();
 
   // Remove scroll/resize listeners
   if (debugScrollHandler) {

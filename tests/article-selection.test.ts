@@ -23,7 +23,11 @@ function addParagraph(parent: HTMLElement, text = paragraphText): HTMLElement {
 
 function click(target: EventTarget): void {
   target.dispatchEvent(
-    new MouseEvent("click", { bubbles: true, cancelable: true }),
+    new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+    }),
   );
 }
 
@@ -57,9 +61,9 @@ describe("custom article selection", () => {
     expect(first.classList.contains(CONTAINER_CLASS)).toBe(true);
 
     click(last);
-    const confirmButton = document.querySelector<HTMLButtonElement>(
-      `.${HUD_CONFIRM_CLASS}`,
-    );
+    const confirmButton = document
+      .getElementById(SELECTION_HUD_ID)
+      ?.shadowRoot?.querySelector<HTMLButtonElement>(`.${HUD_CONFIRM_CLASS}`);
     expect(confirmButton).not.toBeNull();
     expect(article.classList.contains(CONTAINER_CLASS)).toBe(true);
 
@@ -130,9 +134,9 @@ describe("custom article selection", () => {
     const paragraph = addParagraph(document.body);
 
     startCustomArticleSelection();
-    const cancelButton = document.querySelector<HTMLButtonElement>(
-      `.${HUD_CANCEL_CLASS}`,
-    );
+    const cancelButton = document
+      .getElementById(SELECTION_HUD_ID)
+      ?.shadowRoot?.querySelector<HTMLButtonElement>(`.${HUD_CANCEL_CLASS}`);
     expect(cancelButton).not.toBeNull();
 
     click(cancelButton!);
