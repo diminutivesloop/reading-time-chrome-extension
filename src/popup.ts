@@ -21,11 +21,7 @@ import {
   MAX_WORDS_PER_MINUTE,
   isValidWordsPerMinute,
 } from "./shared";
-import {
-  getWordsPerMinute,
-  setWordsPerMinute,
-  resetWordsPerMinute,
-} from "./wpm-storage";
+import { getWordsPerMinute, setWordsPerMinute } from "./wpm-storage";
 
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const customArticleSelectionBtn = document.getElementById(
@@ -37,7 +33,6 @@ const resetCustomArticleBtn = document.getElementById(
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
-const resetWpmBtn = document.getElementById("resetWpmBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
 const debugModeEl = document.getElementById("debugMode") as HTMLInputElement;
 const startSpeedTestBtn = document.getElementById(
@@ -52,10 +47,6 @@ if (analyzeBtn) {
       analyzeCurrentPage();
     }
   });
-}
-
-if (resetWpmBtn) {
-  resetWpmBtn.addEventListener("click", resetWpmSetting);
 }
 
 if (debugModeEl) {
@@ -224,30 +215,6 @@ async function loadWpmSetting(): Promise<void> {
   } catch (error) {
     console.error("Error loading WPM setting:", error);
     showError("Error loading WPM setting");
-  }
-}
-
-/**
- * Reset the WPM setting to default
- */
-async function resetWpmSetting(): Promise<void> {
-  clearError();
-
-  try {
-    const wpm = await resetWordsPerMinute();
-
-    // Update the input to show the default value
-    if (wpmInput) {
-      wpmInput.value = wpm.toString();
-    }
-
-    // Re-analyze if stats are already shown
-    if (wordCountEl && wordCountEl.textContent !== "-") {
-      analyzeCurrentPage();
-    }
-  } catch (error) {
-    console.error("Error resetting WPM setting:", error);
-    showError("Error resetting setting");
   }
 }
 

@@ -18,8 +18,3 @@ export async function getWordsPerMinute(): Promise<number> {
 export async function setWordsPerMinute(wpm: number): Promise<void> {
   await chrome.storage.sync.set({ [STORAGE_KEY_WPM]: wpm });
 }
-
-export async function resetWordsPerMinute(): Promise<number> {
-  await setWordsPerMinute(DEFAULT_WORDS_PER_MINUTE);
-  return DEFAULT_WORDS_PER_MINUTE;
-}

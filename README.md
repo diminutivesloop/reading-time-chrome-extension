@@ -36,7 +36,7 @@ Note: After reloading the extension the popup may not work until you refresh the
 
 ## Configuration
 
-Words per minute can be customized in the popup. Click the reset button to revert to the default of 200. You can also use the Measure Reading Speed button to manually measure your reading speed and then save the updated value.
+Words per minute can be customized in the popup. You can also use the Measure Reading Speed button to manually measure your reading speed and then save the updated value.
 
 ## Future Enhancements
 
