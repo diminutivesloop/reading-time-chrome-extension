@@ -10,7 +10,7 @@ import {
   countWords,
   isValidWordsPerMinute,
 } from "./shared";
-import { setWordsPerMinute } from "./wpm-storage";
+import { setWordsPerMinute } from "./storage";
 import themeCss from "./theme.css";
 
 const TIMER_BAR_ID = "reading-time-speed-timer";

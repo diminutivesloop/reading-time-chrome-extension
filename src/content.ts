@@ -13,19 +13,18 @@ import type { PageStats } from "./page-stats";
 import { countWords } from "./shared";
 import { isDebugActive, enableDebugMode, disableDebugMode } from "./debug";
 import { startReadingTest, cancelReadingTest } from "./speed-test";
-import { getWordsPerMinute } from "./wpm-storage";
 import {
   startCustomArticleSelection,
   cancelCustomArticleSelection,
   resolveUniqueSelector,
 } from "./article-selection";
 import {
+  getWordsPerMinute,
+  getAddReadingTimeToTitle,
   getArticleSelector,
   setArticleSelector,
   removeArticleSelector,
-} from "./article-selector-storage";
-
-import { getAddReadingTimeToTitle } from "./title-setting-storage";
+} from "./storage";
 
 // Track title revision to prevent delayed updates from overwriting newer changes.
 let titleRevision = 0;

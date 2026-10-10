@@ -21,11 +21,12 @@ import {
   MAX_WORDS_PER_MINUTE,
   isValidWordsPerMinute,
 } from "./shared";
-import { getWordsPerMinute, setWordsPerMinute } from "./wpm-storage";
 import {
+  getWordsPerMinute,
+  setWordsPerMinute,
   getAddReadingTimeToTitle,
   setAddReadingTimeToTitle,
-} from "./title-setting-storage";
+} from "./storage";
 
 const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
 const titleSettingInput = document.getElementById(

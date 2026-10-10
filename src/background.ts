@@ -1,25 +1,11 @@
 import type { MessageRequest, MessageResponse } from "./messages";
 
-const STORAGE_KEY_PREFIX = "readingTitle:";
-const URL_STORAGE_KEY_PREFIX = `${STORAGE_KEY_PREFIX}url:`;
-
-interface PersistedReadingTitle {
-  title: string;
-}
-
-function storageKeyForUrl(url: string): string {
-  return `${URL_STORAGE_KEY_PREFIX}${encodeURIComponent(url)}`;
-}
-
-function urlForStorageKey(key: string): string | undefined {
-  if (!key.startsWith(URL_STORAGE_KEY_PREFIX)) return undefined;
-
-  try {
-    return decodeURIComponent(key.slice(URL_STORAGE_KEY_PREFIX.length));
-  } catch {
-    return undefined;
-  }
-}
+import {
+  getPersistedReadingTitle,
+  saveReadingTitle,
+  removeReadingTitle,
+  removeOrphanedReadingTitles,
+} from "./storage";
 
 export async function cleanupOrphanedReadingTitles(
   excludedTabId?: number,
@@ -42,18 +28,9 @@ export async function cleanupOrphanedReadingTitles(
       return;
     }
 
-    const orphanedKeys: string[] = [];
-
-    for (const key of await chrome.storage.local.getKeys()) {
-      const storedUrl = urlForStorageKey(key);
-      if (storedUrl !== undefined) {
-        if (!openUrls.has(storedUrl)) orphanedKeys.push(key);
-      }
-    }
-
+    const orphanedKeys = await removeOrphanedReadingTitles(openUrls);
     if (orphanedKeys.length === 0) return;
 
-    await chrome.storage.local.remove(orphanedKeys);
     console.debug("[Reading Time] Removed orphaned tab titles", orphanedKeys);
   } catch (error) {
     console.error("Error cleaning up orphaned reading titles:", error);
@@ -77,16 +54,7 @@ chrome.runtime.onMessage.addListener(
 
     (async () => {
       if (request.action === "getPersistedReadingTitle") {
-        const key = storageKeyForUrl(request.url);
-        const result = await chrome.storage.local.get<{
-          [key: string]: PersistedReadingTitle;
-        }>([key]);
-        const stored = result[key];
-        const title = stored?.title;
-
-        if (stored && !title) {
-          await chrome.storage.local.remove(key);
-        }
+        const title = await getPersistedReadingTitle(request.url);
 
         if (title) {
           console.debug("[Reading Time] Restored tab title", {
@@ -100,11 +68,7 @@ chrome.runtime.onMessage.addListener(
           title,
         });
       } else if (request.action === "saveReadingTitle") {
-        await chrome.storage.local.set({
-          [storageKeyForUrl(request.url)]: {
-            title: request.title,
-          } satisfies PersistedReadingTitle,
-        });
+        await saveReadingTitle(request.url, request.title);
         console.debug("[Reading Time] Saved tab title", {
           tabId,
           title: request.title,
@@ -112,7 +76,7 @@ chrome.runtime.onMessage.addListener(
         });
         sendResponse();
       } else if (request.action === "removeReadingTitle") {
-        await chrome.storage.local.remove(storageKeyForUrl(request.url));
+        await removeReadingTitle(request.url);
         console.debug("[Reading Time] Removed saved tab title", {
           tabId,
           url: request.url,
