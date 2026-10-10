@@ -24,6 +24,15 @@ beforeEach(() => {
 });
 
 describe("background title storage", () => {
+  it("removes only the requested URL title", async () => {
+    const url = "https://example.com/article";
+    await dispatchMessage({ action: "removeReadingTitle", url });
+    expect(chromeApi.storage.local.remove).toHaveBeenCalledExactlyOnceWith(
+      storageKeyForUrl(url),
+    );
+    expect(chromeApi.storage.local.set).not.toHaveBeenCalled();
+  });
+
   it("removes URL records that are not used by an open tab", async () => {
     const openUrl = "https://example.com/open";
     const closedUrl = "https://example.com/closed";

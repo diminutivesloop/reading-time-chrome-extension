@@ -243,6 +243,7 @@ function finishReadingTest(): void {
   showResultBar(measuredWpm);
 }
 
+// TODO: Replace callback w/ async
 /**
  * Start the reading speed test.
  * @param onWpmSaved Called with the measured WPM after the user saves the result.

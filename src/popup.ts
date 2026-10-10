@@ -22,7 +22,15 @@ import {
   isValidWordsPerMinute,
 } from "./shared";
 import { getWordsPerMinute, setWordsPerMinute } from "./wpm-storage";
+import {
+  getAddReadingTimeToTitle,
+  setAddReadingTimeToTitle,
+} from "./title-setting-storage";
 
+const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
+const titleSettingInput = document.getElementById(
+  "addReadingTimeToTitle",
+) as HTMLInputElement;
 const analyzeBtn = document.getElementById("analyzeBtn") as HTMLButtonElement;
 const customArticleSelectionBtn = document.getElementById(
   "customArticleSelectionBtn",
@@ -32,14 +40,24 @@ const resetCustomArticleBtn = document.getElementById(
 ) as HTMLButtonElement;
 const wordCountEl = document.getElementById("wordCount") as HTMLElement;
 const readingTimeEl = document.getElementById("readingTime") as HTMLElement;
-const wpmInput = document.getElementById("wpmInput") as HTMLInputElement;
 const errorEl = document.getElementById("error") as HTMLElement;
-const debugModeEl = document.getElementById("debugMode") as HTMLInputElement;
+const debugModeInput = document.getElementById("debugMode") as HTMLInputElement;
 const startSpeedTestBtn = document.getElementById(
   "startSpeedTestBtn",
 ) as HTMLButtonElement;
 
 let currentTabId: number | null = null;
+
+if (titleSettingInput) {
+  titleSettingInput.addEventListener("change", async () => {
+    try {
+      await setAddReadingTimeToTitle(titleSettingInput.checked);
+    } catch (error) {
+      console.error("Error saving title setting:", error);
+      showError("Error saving title setting");
+    }
+  });
+}
 
 if (analyzeBtn) {
   analyzeBtn.addEventListener("click", async () => {
@@ -49,9 +67,9 @@ if (analyzeBtn) {
   });
 }
 
-if (debugModeEl) {
-  debugModeEl.addEventListener("change", () => {
-    toggleDebugMode(debugModeEl.checked);
+if (debugModeInput) {
+  debugModeInput.addEventListener("change", () => {
+    toggleDebugMode(debugModeInput.checked);
   });
 }
 
@@ -122,7 +140,11 @@ async function analyzeCurrentPage(): Promise<void> {
     if (tab.id) {
       chrome.tabs.sendMessage<GetPageStatsMessage, GetPageStatsResponse>(
         tab.id,
-        { action: "getPageStats", wordsPerMinute: wpm },
+        {
+          action: "getPageStats",
+          wordsPerMinute: wpm,
+          addReadingTimeToTitle: titleSettingInput.checked,
+        },
         (response) => {
           if (chrome.runtime.lastError) {
             console.error("Error analyzing page:", chrome.runtime.lastError);
@@ -215,6 +237,15 @@ async function loadWpmSetting(): Promise<void> {
   } catch (error) {
     console.error("Error loading WPM setting:", error);
     showError("Error loading WPM setting");
+  }
+}
+
+async function loadTitleSetting(): Promise<void> {
+  try {
+    titleSettingInput.checked = await getAddReadingTimeToTitle();
+  } catch (error) {
+    console.error("Error loading title setting:", error);
+    showError("Error loading title setting");
   }
 }
 
@@ -407,7 +438,7 @@ async function loadDebugSetting(): Promise<void> {
       currentWindow: true,
     });
 
-    if (tab.id && debugModeEl) {
+    if (tab.id && debugModeInput) {
       chrome.tabs.sendMessage<GetDebugStateMessage, GetDebugStateResponse>(
         tab.id,
         { action: "getDebugState" },
@@ -420,7 +451,7 @@ async function loadDebugSetting(): Promise<void> {
             showError("Error loading debug state");
             return;
           }
-          debugModeEl.checked = response.debugActive;
+          debugModeInput.checked = response.debugActive;
         },
       );
     }
@@ -434,8 +465,11 @@ async function loadDebugSetting(): Promise<void> {
 window.addEventListener("load", async () => {
   await initTabChangeListeners();
 
-  loadDebugSetting();
-  loadCustomArticleState();
-  await loadWpmSetting();
+  await Promise.all([
+    loadDebugSetting(),
+    loadCustomArticleState(),
+    loadWpmSetting(),
+    loadTitleSetting(),
+  ]);
   analyzeCurrentPage();
 });

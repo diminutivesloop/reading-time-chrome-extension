@@ -23,9 +23,12 @@ function setInnerText(element: HTMLElement, text: string): void {
   });
 }
 
-function requestPageStats(wordsPerMinute: number): void {
-  messageListener(
-    { action: "getPageStats", wordsPerMinute },
+function requestPageStats(
+  wordsPerMinute: number,
+  addReadingTimeToTitle = true,
+): unknown {
+  return messageListener(
+    { action: "getPageStats", wordsPerMinute, addReadingTimeToTitle },
     {},
     () => undefined,
   );
@@ -35,9 +38,10 @@ async function flushPromises(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   document.body.replaceChildren();
   document.title = "Original title";
+  await messageListener({ action: "pageChanged" }, {}, () => undefined);
 });
 
 describe("getArticleElement", () => {
@@ -104,7 +108,7 @@ describe("calculatePageStats", () => {
   });
 });
 
-describe("appendReadingTimeToTitle", () => {
+describe("update tab title", () => {
   it("formats sub-minute estimates and preserves the original title across updates", () => {
     const main = document.createElement("main");
     setInnerText(main, "one two");
@@ -127,6 +131,21 @@ describe("appendReadingTimeToTitle", () => {
     requestPageStats(2);
 
     expect(document.title).toBe("[<1m] Page updated its title");
+  });
+
+  it("resets the title when and removes from storage when add to title is disabled", async () => {
+    const main = document.createElement("main");
+    setInnerText(main, "one two");
+    document.body.appendChild(main);
+    requestPageStats(1);
+    expect(document.title).toBe("[2m] Original title");
+
+    requestPageStats(1, false);
+    expect(document.title).toBe("Original title");
+    expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+      action: "removeReadingTitle",
+      url: location.href,
+    });
   });
 });
 

@@ -111,6 +111,13 @@ chrome.runtime.onMessage.addListener(
           url: request.url,
         });
         sendResponse();
+      } else if (request.action === "removeReadingTitle") {
+        await chrome.storage.local.remove(storageKeyForUrl(request.url));
+        console.debug("[Reading Time] Removed saved tab title", {
+          tabId,
+          url: request.url,
+        });
+        sendResponse();
       } else if (request.action === "pageChanged") {
         await cleanupOrphanedReadingTitles(tabId);
         console.debug("[Reading Time] Cleared tab title after page change", {

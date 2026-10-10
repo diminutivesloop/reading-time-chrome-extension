@@ -6,6 +6,7 @@ import type { PageStats } from "./page-stats";
 export interface GetPageStatsMessage {
   action: "getPageStats";
   wordsPerMinute: number;
+  addReadingTimeToTitle?: boolean;
 }
 
 export interface ToggleDebugMessage {
@@ -44,6 +45,11 @@ export interface SaveReadingTitleMessage {
   url: string;
 }
 
+export interface RemoveReadingTitleMessage {
+  action: "removeReadingTitle";
+  url: string;
+}
+
 export interface PageChangedMessage {
   action: "pageChanged";
   url?: string;
@@ -59,6 +65,7 @@ export type MessageRequest =
   | ResetCustomArticleMessage
   | GetPersistedReadingTitleMessage
   | SaveReadingTitleMessage
+  | RemoveReadingTitleMessage
   | PageChangedMessage;
 
 /**

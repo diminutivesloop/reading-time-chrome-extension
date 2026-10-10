@@ -27,6 +27,26 @@ h1 {
   text-align: center;
 }
 
+input:focus-visible {
+  outline-color: var(--reading-time-burgundy);
+}
+
+label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    accent-color: var(--reading-time-burgundy);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+}
+
 .btn {
   img {
     width: 18px;
@@ -84,11 +104,6 @@ h1 {
     border-radius: 4px;
     font-size: 13px;
     transition: border-color 0.2s;
-
-    &:focus-visible {
-      outline: 3px solid var(--reading-time-burgundy);
-      outline-offset: 2px;
-    }
   }
 }
 
@@ -109,21 +124,4 @@ h1 {
 .debug-section {
   border-top: 1px solid var(--reading-time-burgundy);
   padding-top: 12px;
-
-  .debug-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--reading-time-burgundy);
-    cursor: pointer;
-    user-select: none;
-
-    input[type="checkbox"] {
-      accent-color: var(--reading-time-burgundy);
-      width: 14px;
-      height: 14px;
-      cursor: pointer;
-    }
-  }
 }

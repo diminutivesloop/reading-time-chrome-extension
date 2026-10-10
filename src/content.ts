@@ -25,6 +25,10 @@ import {
   removeArticleSelector,
 } from "./article-selector-storage";
 
+import { getAddReadingTimeToTitle } from "./title-setting-storage";
+
+// Track title revision to prevent delayed updates from overwriting newer changes.
+let titleRevision = 0;
 let originalPageTitle = document.title;
 let lastAppliedReadingTitle: string | null = null;
 let persistedReadingTitle: string | null = null;
@@ -88,7 +92,8 @@ export function calculatePageStats(wordsPerMinute?: number): PageStats {
 /**
  * Prepend the latest estimate to the saved page title
  */
-function appendReadingTimeToTitle(minutes: number): void {
+function addReadingTimeToTitle(minutes: number): void {
+  titleRevision++;
   // If the page changed its own title, refresh the saved original title.
   if (!lastAppliedReadingTitle || document.title !== lastAppliedReadingTitle) {
     originalPageTitle = document.title;
@@ -111,16 +116,20 @@ function appendReadingTimeToTitle(minutes: number): void {
 /**
  * Calculate stats and, when an estimate is available, show it in the title
  */
-function updateTitleWithStats(wordsPerMinute: number): PageStats {
+function updateTitleWithStats(
+  wordsPerMinute: number,
+  addToTitle = true,
+): PageStats {
   const stats = calculatePageStats(wordsPerMinute);
-  if (stats.readingMinutes) {
-    appendReadingTimeToTitle(stats.readingMinutes);
+  if (addToTitle && stats.readingMinutes) {
+    addReadingTimeToTitle(stats.readingMinutes);
   }
   return stats;
 }
 
 async function restorePersistedReadingTitle(): Promise<void> {
   try {
+    const revision = titleRevision;
     const request: GetPersistedReadingTitleMessage = {
       action: "getPersistedReadingTitle",
       url: location.href,
@@ -129,6 +138,7 @@ async function restorePersistedReadingTitle(): Promise<void> {
       GetPersistedReadingTitleResponse | undefined;
     if (
       response?.title &&
+      revision === titleRevision &&
       request.url === lastKnownPageUrl &&
       !lastAppliedReadingTitle
     ) {
@@ -145,7 +155,8 @@ async function restorePersistedReadingTitle(): Promise<void> {
   }
 }
 
-function resetReadingTitleAfterPageChange(): void {
+function resetReadingTitle(): void {
+  titleRevision++;
   if (lastAppliedReadingTitle && document.title === lastAppliedReadingTitle) {
     document.title = originalPageTitle;
   }
@@ -153,14 +164,15 @@ function resetReadingTitleAfterPageChange(): void {
   originalPageTitle = document.title;
   lastAppliedReadingTitle = null;
   persistedReadingTitle = null;
-  console.debug("[Reading Time] Reset title state after page change");
 }
 
 function handlePageNavigation(): void {
   if (location.href === lastKnownPageUrl) return;
 
   lastKnownPageUrl = location.href;
-  resetReadingTitleAfterPageChange();
+  resetReadingTitle();
+  console.debug("[Reading Time] Reset title state after page change");
+
   chrome.runtime
     .sendMessage({ action: "pageChanged", url: lastKnownPageUrl })
     .catch((error) =>
@@ -229,7 +241,10 @@ export async function applyCustomArticleSelection(element: HTMLElement) {
     enableDebugMode();
   }
 
-  updateTitleWithStats(await getWordsPerMinute());
+  updateTitleWithStats(
+    await getWordsPerMinute(),
+    await getAddReadingTimeToTitle(),
+  );
 
   setArticleSelector(location.hostname, selector)
     .then(() =>
@@ -308,7 +323,10 @@ export async function resetCustomArticle(): Promise<void> {
     enableDebugMode();
   }
 
-  updateTitleWithStats(await getWordsPerMinute());
+  updateTitleWithStats(
+    await getWordsPerMinute(),
+    await getAddReadingTimeToTitle(),
+  );
 }
 
 // Clean up if the page is being unloaded
@@ -327,7 +345,15 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response?: MessageResponse) => void,
   ) => {
     if (request.action === "getPageStats") {
-      const stats = updateTitleWithStats(request.wordsPerMinute);
+      const addToTitle = request.addReadingTimeToTitle ?? true;
+      if (!addToTitle) {
+        resetReadingTitle();
+        await chrome.runtime.sendMessage({
+          action: "removeReadingTitle",
+          url: location.href,
+        });
+      }
+      const stats = updateTitleWithStats(request.wordsPerMinute, addToTitle);
       sendResponse({ action: "getPageStats", stats });
     } else if (request.action === "toggleDebug") {
       if (request.enabled) {
@@ -339,7 +365,15 @@ chrome.runtime.onMessage.addListener(
     } else if (request.action === "getDebugState") {
       sendResponse({ action: "getDebugState", debugActive: isDebugActive() });
     } else if (request.action === "startReadingTest") {
-      startReadingTest(updateTitleWithStats);
+      startReadingTest((wpm) => {
+        void (async () => {
+          try {
+            updateTitleWithStats(wpm, await getAddReadingTimeToTitle());
+          } catch (error) {
+            console.error("Error updating reading-time title:", error);
+          }
+        })();
+      });
       sendResponse();
     } else if (request.action === "startCustomArticleSelection") {
       applyCustomArticleSelection(await startCustomArticleSelection());
@@ -359,7 +393,8 @@ chrome.runtime.onMessage.addListener(
         sendResponse({ action: "resetCustomArticle", success: false });
       }
     } else if (request.action === "pageChanged") {
-      resetReadingTitleAfterPageChange();
+      resetReadingTitle();
+      console.debug("[Reading Time] Reset title state after page change");
       sendResponse();
     }
   },
